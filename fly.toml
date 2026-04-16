@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for stencillabnew on 2026-04-16T23:23:25Z
+# fly.toml app configuration file generated for stencillab on 2026-04-16T23:51:01Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'stencillabnew'
+app = 'stencillab'
 primary_region = 'ams'
 
 [build]
