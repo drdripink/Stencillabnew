@@ -669,13 +669,14 @@ var STATE = {
   stencilLora: '',
   imageLoraModel: '',
   apiKey: (function(){ var h=''; try { return localStorage.getItem('sl_api_key')||h; } catch(e){ return h; } })(),
-  stripeKey: 'PASTE_YOUR_STRIPE_PUBLISHABLE_KEY_HERE',
-  stripePrices: {
-    basic:   'PASTE_BASIC_PRICE_ID',
-    pro:     'PASTE_PRO_PRICE_ID',
-    duo:     'PASTE_DUO_PRICE_ID',
-    studio:  'PASTE_STUDIO_PRICE_ID',
-  },
+  stripeKey: (function(){ try { return localStorage.getItem('sl_stripe_key') || 'PASTE_YOUR_STRIPE_PUBLISHABLE_KEY_HERE'; } catch(e){ return 'PASTE_YOUR_STRIPE_PUBLISHABLE_KEY_HERE'; } })(),
+  stripePrices: (function(){
+    try {
+      var raw = localStorage.getItem('sl_stripe_prices');
+      if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') return p; }
+    } catch(e){}
+    return { basic:'PASTE_BASIC_PRICE_ID', pro:'PASTE_PRO_PRICE_ID', duo:'PASTE_DUO_PRICE_ID', studio:'PASTE_STUDIO_PRICE_ID' };
+  })(),
   adminStats: { total:247, active:189, trial:43, cancelled:15 },
   users: [
     { id:'1', email:'jake@gmail.com', name:'Jake Morrison', plan:'pro', active:true, freeAccess:false, discount:0, role:'user', sponsored:false, instagram:'@jakemorrisson_ink', dob:'1990-05-12' },
@@ -1214,6 +1215,28 @@ function renderSettings(){
   html+='<button id="btn-save-rep-key" class="btn btn-primary btn-full" style="height:40px;font-size:13px">SAVE REPLICATE KEY</button>';
   html+='</div>';
 
+  html+='</div>';
+
+  // Stripe config card
+  var hasStripeKey = STATE.stripeKey && STATE.stripeKey.indexOf('PASTE') < 0 && STATE.stripeKey.length > 10;
+  var stripeStatus = hasStripeKey ? '<span style="color:#22c55e">&#9679; Stripe key saved</span>' : '<span style="color:var(--text3)">Not configured</span>';
+  html+='<div class="card" style="max-width:800px;margin-top:16px">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+  html+='<div style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:2px">STRIPE SUBSCRIPTIONS</div>';
+  html+='<span style="font-size:11px">'+stripeStatus+'</span></div>';
+  html+='<div style="font-size:11px;color:var(--text3);margin-bottom:14px">Paste your Stripe publishable key and 4 subscription Price IDs from dashboard.stripe.com. Saved locally.</div>';
+  html+='<label class="label">PUBLISHABLE KEY (pk_live_ or pk_test_)</label>';
+  html+='<input id="settings-stripe-key" type="password" placeholder="pk_live_..." value="'+(hasStripeKey?STATE.stripeKey:'')+'" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius);padding:11px 12px;font-family:monospace;font-size:12px;outline:none;margin-bottom:14px"/>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
+  var stripePlans = [{id:'basic',label:'BASIC £9.99'},{id:'pro',label:'PRO £19.99'},{id:'duo',label:'DUO £24.99'},{id:'studio',label:'STUDIO £49.99'}];
+  stripePlans.forEach(function(p){
+    var cur = (STATE.stripePrices && STATE.stripePrices[p.id]) || '';
+    var valid = cur && cur.indexOf('PASTE') < 0;
+    html+='<div><label class="label">'+p.label+' PRICE ID</label>';
+    html+='<input id="settings-stripe-price-'+p.id+'" class="input" placeholder="price_..." value="'+(valid?cur:'')+'" style="font-family:monospace;font-size:11px"/></div>';
+  });
+  html+='</div>';
+  html+='<button id="btn-save-stripe" class="btn btn-primary" style="min-width:220px;height:40px;font-size:13px">SAVE STRIPE CONFIG</button>';
   html+='</div>';
 
   // AI Pipeline config card
@@ -2333,6 +2356,23 @@ function attachEvents() {
     STATE.stencilLora=sl?sl.value.trim():'';
     STATE.imageLoraModel=il?il.value.trim():'';
     render();showToast('Pipeline config saved!','success');
+  });
+  var bss=document.getElementById('btn-save-stripe');
+  if(bss) bss.addEventListener('click',function(){
+    var ek=document.getElementById('settings-stripe-key');
+    var key=ek?ek.value.trim():'';
+    if(!key || key.indexOf('pk_')!==0){showToast('Publishable key must start with pk_','error');return;}
+    var prices={};
+    ['basic','pro','duo','studio'].forEach(function(p){
+      var e=document.getElementById('settings-stripe-price-'+p);
+      prices[p]=e?e.value.trim():'';
+    });
+    var missing=Object.keys(prices).filter(function(k){return !prices[k] || prices[k].indexOf('price_')!==0;});
+    if(missing.length){showToast('Missing/invalid Price IDs: '+missing.join(', '),'error');return;}
+    STATE.stripeKey=key;
+    STATE.stripePrices=prices;
+    try{localStorage.setItem('sl_stripe_key',key);localStorage.setItem('sl_stripe_prices',JSON.stringify(prices));}catch(e){}
+    render();showToast('Stripe config saved! Subscriptions are live.','success');
   });
   var bck=document.getElementById('btn-clear-key');
   if(bck) bck.addEventListener('click',function(){
