@@ -1908,13 +1908,10 @@ async function generateImage(){
       var output;
       var fullPrompt='';
       if(palette==='bw'){
-        fullPrompt='black and white photorealistic tattoo flash art, ultra detailed, dramatic studio lighting, sharp focus, professional tattoo artist reference, white background, no color, '+userPrompt+', 4K, no watermark';
+        fullPrompt='ultra photorealistic black and white photograph of '+userPrompt+', professional studio photography, dramatic Rembrandt lighting, razor-sharp focus, rich tonal range, fine skin texture and detail, shot on Hasselblad, 85mm lens, tattoo artist reference, white seamless background, 8K, no watermark, no illustration, no drawing';
         output=await callReplicate('black-forest-labs/flux-1.1-pro-ultra',{prompt:fullPrompt,aspect_ratio:'1:1',output_format:'png',output_quality:100,raw:true,safety_tolerance:6});
-      }else if(palette==='color'){
-        fullPrompt='full color photorealistic tattoo flash art, vibrant cinematic colors, ultra detailed, studio lighting, professional tattoo reference artwork, white background, '+userPrompt+', 4K, no watermark';
-        output=await callReplicate('black-forest-labs/flux-1.1-pro-ultra',{prompt:fullPrompt,aspect_ratio:'1:1',output_format:'png',output_quality:100,raw:false,safety_tolerance:6});
       }else{
-        fullPrompt='photorealistic '+userPrompt+', ultra detailed, cinematic lighting, sharp focus, 8K, professional photograph quality, white background, no watermark';
+        fullPrompt='ultra photorealistic full colour photograph of '+userPrompt+', professional studio photography, cinematic lighting, razor-sharp focus, vibrant true-to-life colours, fine skin texture and detail, shot on Hasselblad, 85mm lens, tattoo artist reference, white seamless background, 8K, no watermark, no illustration, no drawing';
         output=await callReplicate('black-forest-labs/flux-1.1-pro-ultra',{prompt:fullPrompt,aspect_ratio:'1:1',output_format:'png',output_quality:100,raw:true,safety_tolerance:6});
       }
       STATE.genOutput=Array.isArray(output)?output[0]:output;
