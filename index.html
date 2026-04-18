@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Stencil Lab — Professional Tattoo Tools</title>
+<script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 <style>
 /* ── DESIGN TOKENS ─────────────────────────────────────────────── */
 :root {
@@ -1150,34 +1151,15 @@ function renderGenerate() {
 
 // ── SUBSCRIPTION ────────────────────────────────────────────────────────────
 function renderSubscription() {
-  var plans = [
-    {id:'basic',  name:'BASIC',  price:'&pound;9.99',  desc:'Solo artist starter pack',         s:15,   e:5,   g:5,   pop:false, best:false},
-    {id:'pro',    name:'PRO',    price:'&pound;19.99', desc:'Most popular for working artists',  s:200,  e:100, g:100, pop:true,  best:false},
-    {id:'duo',    name:'DUO',    price:'&pound;24.99', desc:'Perfect for artist duos',          s:200,  e:100, g:100, pop:false, best:false},
-    {id:'studio', name:'STUDIO', price:'&pound;49.99', desc:'Full studio team access',          s:1000, e:500, g:500, pop:false, best:true}
-  ];
+  var email = (STATE.user && STATE.user.email) ? STATE.user.email : '';
   var html = '';
   html += '<div class="page-header"><div class="page-title">CHOOSE <span>YOUR PLAN</span></div>';
-  html += '<div class="page-subtitle">All plans include full AI access &bull; Cancel anytime</div></div>';
-  html += '<div class="grid-2" style="max-width:720px">';
-  plans.forEach(function(p) {
-    var sel = STATE.selectedPlan === p.id;
-    html += '<div class="plan-card" data-plan="' + p.id + '" style="background:' + (sel?'rgba(230,57,70,.06)':'var(--surface2)') + ';border:1.5px solid ' + (sel?'var(--accent)':'var(--border)') + ';border-radius:var(--radius2);padding:22px;cursor:pointer;position:relative;transition:.15s">';
-    if (p.pop)  html += '<div style="position:absolute;top:-1px;right:16px;background:var(--accent);color:#fff;font-size:9px;font-family:Impact,sans-serif;letter-spacing:1.5px;padding:3px 10px;border-radius:0 0 6px 6px">MOST POPULAR</div>';
-    if (p.best) html += '<div style="position:absolute;top:-1px;right:16px;background:var(--gold);color:#000;font-size:9px;font-family:Impact,sans-serif;letter-spacing:1.5px;padding:3px 10px;border-radius:0 0 6px 6px">BEST VALUE</div>';
-    html += '<div style="font-family:Impact,sans-serif;font-size:22px;letter-spacing:2.5px;margin-bottom:2px">' + p.name + '</div>';
-    html += '<div style="font-size:11px;color:var(--text3);margin-bottom:14px">' + p.desc + '</div>';
-    html += '<div style="font-family:Impact,sans-serif;font-size:36px;line-height:1;color:' + (sel?'var(--accent)':'var(--text)') + ';margin-bottom:16px">' + p.price + '<span style="font-size:13px;color:var(--text3)">/mo</span></div>';
-    html += '<div style="font-size:12px;color:var(--text2);line-height:1.8">&#10003; ' + p.s + ' stencils &nbsp; &#10003; ' + p.e + ' enhancements &nbsp; &#10003; ' + p.g + ' generations</div>';
-    html += '</div>';
-  });
-  html += '</div>';
-  html += '<div style="margin-top:24px;max-width:480px">';
-  html += '<button id="btn-subscribe" style="width:100%;height:58px;border-radius:var(--radius);border:1px solid rgba(255,255,255,.3);cursor:pointer;background:linear-gradient(135deg,#fff,#ccc);font-family:Impact,sans-serif;font-size:18px;letter-spacing:2px;color:#000">SUBSCRIBE WITH STRIPE</button>';
-  html += '<div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11px;color:var(--text3)">';
-  html += '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>';
-  html += 'Secured by Stripe &bull; Cancel anytime &bull; No hidden fees';
-  html += '</div></div>';
+  html += '<div class="page-subtitle">All plans include full AI access &bull; Cancel anytime &bull; Secured by Stripe</div></div>';
+  html += '<stripe-pricing-table '
+       +  'pricing-table-id="prctbl_1TNiK0RyV27u3CVk3ChKzSeI" '
+       +  'publishable-key="pk_live_51TNfQBRyV27u3CVkOW56xlhg13woyp9hRSutqYazb8kg1Wm051U6a7qtrgXjMf24ZsQ5QhVALS1a2FhR6Suf2uyx00R6wEshC3"'
+       +  (email ? ' customer-email="' + email + '"' : '')
+       +  '></stripe-pricing-table>';
   return html;
 }
 
@@ -1215,28 +1197,6 @@ function renderSettings(){
   html+='<button id="btn-save-rep-key" class="btn btn-primary btn-full" style="height:40px;font-size:13px">SAVE REPLICATE KEY</button>';
   html+='</div>';
 
-  html+='</div>';
-
-  // Stripe config card
-  var hasStripeKey = STATE.stripeKey && STATE.stripeKey.indexOf('PASTE') < 0 && STATE.stripeKey.length > 10;
-  var stripeStatus = hasStripeKey ? '<span style="color:#22c55e">&#9679; Stripe key saved</span>' : '<span style="color:var(--text3)">Not configured</span>';
-  html+='<div class="card" style="max-width:800px;margin-top:16px">';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-  html+='<div style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:2px">STRIPE SUBSCRIPTIONS</div>';
-  html+='<span style="font-size:11px">'+stripeStatus+'</span></div>';
-  html+='<div style="font-size:11px;color:var(--text3);margin-bottom:14px">Paste your Stripe publishable key and 4 subscription Price IDs from dashboard.stripe.com. Saved locally.</div>';
-  html+='<label class="label">PUBLISHABLE KEY (pk_live_ or pk_test_)</label>';
-  html+='<input id="settings-stripe-key" type="password" placeholder="pk_live_..." value="'+(hasStripeKey?STATE.stripeKey:'')+'" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius);padding:11px 12px;font-family:monospace;font-size:12px;outline:none;margin-bottom:14px"/>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
-  var stripePlans = [{id:'basic',label:'BASIC £9.99'},{id:'pro',label:'PRO £19.99'},{id:'duo',label:'DUO £24.99'},{id:'studio',label:'STUDIO £49.99'}];
-  stripePlans.forEach(function(p){
-    var cur = (STATE.stripePrices && STATE.stripePrices[p.id]) || '';
-    var valid = cur && cur.indexOf('PASTE') < 0;
-    html+='<div><label class="label">'+p.label+' PRICE ID</label>';
-    html+='<input id="settings-stripe-price-'+p.id+'" class="input" placeholder="price_..." value="'+(valid?cur:'')+'" style="font-family:monospace;font-size:11px"/></div>';
-  });
-  html+='</div>';
-  html+='<button id="btn-save-stripe" class="btn btn-primary" style="min-width:220px;height:40px;font-size:13px">SAVE STRIPE CONFIG</button>';
   html+='</div>';
 
   // AI Pipeline config card
@@ -2356,23 +2316,6 @@ function attachEvents() {
     STATE.stencilLora=sl?sl.value.trim():'';
     STATE.imageLoraModel=il?il.value.trim():'';
     render();showToast('Pipeline config saved!','success');
-  });
-  var bss=document.getElementById('btn-save-stripe');
-  if(bss) bss.addEventListener('click',function(){
-    var ek=document.getElementById('settings-stripe-key');
-    var key=ek?ek.value.trim():'';
-    if(!key || key.indexOf('pk_')!==0){showToast('Publishable key must start with pk_','error');return;}
-    var prices={};
-    ['basic','pro','duo','studio'].forEach(function(p){
-      var e=document.getElementById('settings-stripe-price-'+p);
-      prices[p]=e?e.value.trim():'';
-    });
-    var missing=Object.keys(prices).filter(function(k){return !prices[k] || prices[k].indexOf('price_')!==0;});
-    if(missing.length){showToast('Missing/invalid Price IDs: '+missing.join(', '),'error');return;}
-    STATE.stripeKey=key;
-    STATE.stripePrices=prices;
-    try{localStorage.setItem('sl_stripe_key',key);localStorage.setItem('sl_stripe_prices',JSON.stringify(prices));}catch(e){}
-    render();showToast('Stripe config saved! Subscriptions are live.','success');
   });
   var bck=document.getElementById('btn-clear-key');
   if(bck) bck.addEventListener('click',function(){
