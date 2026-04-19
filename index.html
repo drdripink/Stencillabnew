@@ -1045,7 +1045,13 @@ function renderStencil() {
   html += '<div><label class="label">OUTPUT</label>';
   if (STATE.stencilOutput) {
     html += '<div style="background:#fff;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.4)">';
-    html += '<img id="stencil-result" src="' + STATE.stencilOutput + '" style="width:100%;display:block"/></div>';
+    html += '<div class="ba-wrap" id="ba-wrap" style="height:310px">';
+    html += '<div class="ba-before"><img src="' + STATE.stencilInput + '" style="width:100%;height:310px;object-fit:cover"/></div>';
+    html += '<div class="ba-after" style="width:' + (STATE.baPosition*100) + '%"><img src="' + STATE.stencilOutput + '" style="position:absolute;top:0;left:0;height:310px;width:' + (100/STATE.baPosition) + '%;max-width:none;object-fit:cover"/></div>';
+    html += '<div class="ba-divider" style="left:' + (STATE.baPosition*100) + '%"></div>';
+    html += '<div class="ba-handle" style="left:' + (STATE.baPosition*100) + '%"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#333" stroke-width="2.5"><polyline points="15 18 21 12 15 6"/><polyline points="9 6 3 12 9 18"/></svg></div>';
+    html += '<div class="ba-label" style="left:12px">BEFORE</div><div class="ba-label" style="right:12px">AFTER</div>';
+    html += '</div></div>';
     html += '<div style="margin-top:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">';
     html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">';
     html += '<label class="label" style="margin:0">LINE INTENSITY</label>';
