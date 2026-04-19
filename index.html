@@ -637,39 +637,39 @@ input[type=range]::-webkit-slider-thumb{
   .input-row{grid-template-columns:1fr}
 }
 
-.admin-wrap{padding:0 0 40px}.admin-title{font-family:var(--font-heading);font-size:20px;letter-spacing:3px;color:var(--white);margin:0 0 16px}
+.admin-wrap{padding:0 0 40px}
+.admin-title{font-family:var(--font-heading);font-size:20px;letter-spacing:3px;color:var(--white);margin:0 0 16px}
 .admin-stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
 @media(max-width:600px){.admin-stats-row{grid-template-columns:repeat(2,1fr)}}
-.admin-stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:border-color .2s,transform .15s}
+.admin-stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;transition:border-color .2s,transform .15s}
 .admin-stat-card:hover{border-color:var(--neon);transform:translateY(-2px)}
 .admin-stat-num{font-family:var(--font-heading);font-size:24px;font-weight:700;color:var(--white)}
 .admin-stat-label{font-size:9px;letter-spacing:2px;color:var(--grey);margin-top:4px;text-transform:uppercase}
 .admin-stat-sub{border-color:var(--neon)}.admin-stat-sub .admin-stat-num{color:var(--neon)}
 .admin-stat-rev{border-color:#4ade80}.admin-stat-rev .admin-stat-num{color:#4ade80}
-.admin-stat-cancel{border-color:#f87171}.admin-stat-cancel .admin-stat-num{color:#f87171}
+.admin-stat-can{border-color:#f87171}.admin-stat-can .admin-stat-num{color:#f87171}
 .admin-filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.admin-filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--grey-light);font-size:11px;font-weight:700;letter-spacing:1px;padding:7px 12px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:all .2s}
-.admin-filter-btn:hover,.admin-filter-btn.afl,.afl{background:var(--neon);border-color:var(--neon);color:var(--bg)}
-.admin-user-list{display:flex;flex-direction:column;gap:8px}
-.admin-user-row{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s}
-.admin-user-row:hover{border-color:var(--border2)}
-.admin-user-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.admin-fbtn{background:var(--surface2);border:1px solid var(--border);color:var(--grey-light);font-size:11px;font-weight:700;letter-spacing:1px;padding:7px 12px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.admin-fbtn:hover,.admin-fbtn.afl,.afl{background:var(--neon) !important;border-color:var(--neon) !important;color:var(--bg) !important}
+.admin-ulist{display:flex;flex-direction:column;gap:8px}
+.admin-urow{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s}
+.admin-urow:hover{border-color:var(--border2)}
+.admin-umain{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .admin-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .adg{background:#4ade80;box-shadow:0 0 6px #4ade80}.adr{background:#f87171;box-shadow:0 0 6px #f87171}.adgr{background:var(--grey)}
-.admin-user-info{min-width:0}
-.admin-user-email{font-size:13px;color:var(--white-dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
-.admin-user-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.admin-uinfo{min-width:0}
+.admin-uemail{font-size:13px;color:var(--white-dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.admin-umeta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
 .admin-badge{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:4px;text-transform:uppercase}
 .abp{background:rgba(99,102,241,.2);color:#818cf8;border:1px solid rgba(99,102,241,.3)}
 .abs{background:rgba(234,179,8,.15);color:#fbbf24;border:1px solid rgba(234,179,8,.3)}
 .abf{background:var(--surface3);color:var(--grey);border:1px solid var(--border)}
 .asuper{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
-.admin-meta-txt{font-size:10px;color:var(--grey)}.agreen{color:#4ade80}.ared{color:#f87171}
-.admin-user-actions{display:flex;gap:8px;flex-shrink:0}
-.admin-action-btn{background:transparent;border:1px solid var(--border);color:var(--grey);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.adel:hover{border-color:#f87171;color:#f87171;background:rgba(239,68,68,.1)}
+.admin-mtxt{font-size:10px;color:var(--grey)}.agreen{color:#4ade80}.ared{color:#f87171}
+.admin-delbtn{background:transparent;border:1px solid var(--border);color:var(--grey);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:14px;flex-shrink:0;transition:all .2s}
+.admin-delbtn:hover{border-color:#f87171;color:#f87171;background:rgba(239,68,68,.1)}
 .admin-empty{color:var(--grey);font-size:13px;padding:40px;text-align:center}
-.danger-delete-btn{background:transparent;border:1px solid #f87171;color:#f87171;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:1px;width:100%;margin-top:24px;transition:all .2s}
+.danger-delete-btn{background:transparent;border:1px solid #f87171;color:#f87171;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;width:100%;margin-top:24px;transition:all .2s}
 .danger-delete-btn:hover{background:rgba(239,68,68,.1)}
 </style>
 </head>
@@ -1271,60 +1271,60 @@ function renderSettings(){
 // ── ADMIN ───────────────────────────────────────────────────────────────────
 function renderAdmin() {
   var users = STATE.users || [];
-  var planPrices = { free: 0, pro: 9.99, studio: 29.99 };
-  var activeUsers = users.filter(function(u) { return u.subscribed && !u.cancelled; });
-  var cancelledUsers = users.filter(function(u) { return u.cancelled; });
-  var freeUsers = users.filter(function(u) { return !u.subscribed && !u.cancelled; });
-  var monthlyRevenue = activeUsers.reduce(function(sum, u) { return sum + (planPrices[u.plan] || 0); }, 0);
-  var sortedByUsage = users.slice().sort(function(a, b) {
-    var aU = (a.stencils_used||0)+(a.enhancements_used||0)+(a.generations_used||0);
-    var bU = (b.stencils_used||0)+(b.enhancements_used||0)+(b.generations_used||0);
-    return bU - aU;
+  var pp = { free: 0, pro: 9.99, studio: 29.99 };
+  var active = users.filter(function(u){ return u.subscribed && !u.cancelled; });
+  var cancelled = users.filter(function(u){ return u.cancelled; });
+  var freeU = users.filter(function(u){ return !u.subscribed && !u.cancelled; });
+  var rev = active.reduce(function(s,u){ return s + (pp[u.plan]||0); }, 0);
+  var byUsage = users.slice().sort(function(a,b){
+    var au=(a.stencils_used||0)+(a.enhancements_used||0)+(a.generations_used||0);
+    var bu=(b.stencils_used||0)+(b.enhancements_used||0)+(b.generations_used||0);
+    return bu-au;
   });
-  var filter = STATE.adminFilter || 'all';
-  var displayUsers = filter==='subscribed' ? activeUsers : filter==='cancelled' ? cancelledUsers : filter==='active' ? sortedByUsage.slice(0,20) : users;
-  return '<div class="admin-wrap">' +
-    '<h2 class="admin-title">ADMIN DASHBOARD</h2>' +
-    '<div class="admin-stats-row">' +
-      '<div class="admin-stat-card" onclick="STATE.adminFilter=\'all\';render()" style="cursor:pointer"><div class="admin-stat-num">' + users.length + '</div><div class="admin-stat-label">TOTAL USERS</div></div>' +
-      '<div class="admin-stat-card admin-stat-sub" onclick="STATE.adminFilter=\'subscribed\';render()" style="cursor:pointer"><div class="admin-stat-num">' + activeUsers.length + '</div><div class="admin-stat-label">SUBSCRIBED</div></div>' +
-      '<div class="admin-stat-card admin-stat-rev" onclick="STATE.adminFilter=\'subscribed\';render()" style="cursor:pointer"><div class="admin-stat-num">&#163;' + monthlyRevenue.toFixed(2) + '</div><div class="admin-stat-label">MONTHLY REVENUE</div></div>' +
-      '<div class="admin-stat-card admin-stat-cancel" onclick="STATE.adminFilter=\'cancelled\';render()" style="cursor:pointer"><div class="admin-stat-num">' + cancelledUsers.length + '</div><div class="admin-stat-label">CANCELLED</div></div>' +
-      '<div class="admin-stat-card" onclick="STATE.adminFilter=\'active\';render()" style="cursor:pointer"><div class="admin-stat-num">' + freeUsers.length + '</div><div class="admin-stat-label">FREE USERS</div></div>' +
-    '</div>' +
-    '<div class="admin-filter-bar">' +
-      '<button class="admin-filter-btn' + (filter==='all'?' afl':'') + '" onclick="STATE.adminFilter=\'all\';render()">All Users</button>' +
-      '<button class="admin-filter-btn' + (filter==='subscribed'?' afl':'') + '" onclick="STATE.adminFilter=\'subscribed\';render()">Subscribed</button>' +
-      '<button class="admin-filter-btn' + (filter==='cancelled'?' afl':'') + '" onclick="STATE.adminFilter=\'cancelled\';render()">Cancelled</button>' +
-      '<button class="admin-filter-btn' + (filter==='active'?' afl':'') + '" onclick="STATE.adminFilter=\'active\';render()">Most Active</button>' +
-    '</div>' +
-    '<div class="admin-user-list">' +
-    (displayUsers.length===0 ? '<div class="admin-empty">No users here</div>' :
-      displayUsers.map(function(u) {
-        var usage = (u.stencils_used||0)+(u.enhancements_used||0)+(u.generations_used||0);
-        var pb = u.plan==='pro' ? 'abp' : u.plan==='studio' ? 'abs' : 'abf';
-        var sd = u.cancelled ? 'adr' : u.subscribed ? 'adg' : 'adgr';
-        return '<div class="admin-user-row">' +
-          '<div class="admin-user-main">' +
-            '<span class="admin-dot ' + sd + '"></span>' +
-            '<div class="admin-user-info">' +
-              '<div class="admin-user-email">' + (u.email||'Unknown') + '</div>' +
-              '<div class="admin-user-meta">' +
-                '<span class="admin-badge ' + pb + '">' + (u.plan||'free').toUpperCase() + '</span>' +
-                (u.role==='admin' ? '<span class="admin-badge asuper">SUPER USER</span>' : '') +
-                '<span class="admin-meta-txt">Uses:' + usage + '</span>' +
-                (u.cancelled ? '<span class="admin-meta-txt ared">Cancelled</span>' : '') +
-                (u.subscribed&&!u.cancelled ? '<span class="admin-meta-txt agreen">&#163;' + (planPrices[u.plan]||0).toFixed(2) + '/mo</span>' : '') +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="admin-user-actions">' +
-            '<button class="admin-action-btn adel" onclick="adminDeleteUser(\'' + (u.id||u.email) + '\')" title="Delete">&#128465;</button>' +
-          '</div>' +
-        '</div>';
-      }).join('')) +
-    '</div>' +
-  '</div>';
+  var f = STATE.adminFilter || 'all';
+  var list = f==='subscribed'?active:f==='cancelled'?cancelled:f==='active'?byUsage.slice(0,20):users;
+  var html = '<div class="admin-wrap">';
+  html += '<h2 class="admin-title">ADMIN DASHBOARD</h2>';
+  html += '<div class="admin-stats-row">';
+  html += '<div class="admin-stat-card" onclick="STATE.adminFilter=\'all\';render()" style="cursor:pointer"><div class="admin-stat-num">'+users.length+'</div><div class="admin-stat-label">TOTAL USERS</div></div>';
+  html += '<div class="admin-stat-card admin-stat-sub" onclick="STATE.adminFilter=\'subscribed\';render()" style="cursor:pointer"><div class="admin-stat-num">'+active.length+'</div><div class="admin-stat-label">SUBSCRIBED</div></div>';
+  html += '<div class="admin-stat-card admin-stat-rev" onclick="STATE.adminFilter=\'subscribed\';render()" style="cursor:pointer"><div class="admin-stat-num">&#163;'+rev.toFixed(2)+'</div><div class="admin-stat-label">MONTHLY REVENUE</div></div>';
+  html += '<div class="admin-stat-card admin-stat-can" onclick="STATE.adminFilter=\'cancelled\';render()" style="cursor:pointer"><div class="admin-stat-num">'+cancelled.length+'</div><div class="admin-stat-label">CANCELLED</div></div>';
+  html += '<div class="admin-stat-card" onclick="STATE.adminFilter=\'active\';render()" style="cursor:pointer"><div class="admin-stat-num">'+freeU.length+'</div><div class="admin-stat-label">FREE USERS</div></div>';
+  html += '</div>';
+  html += '<div class="admin-filter-bar">';
+  html += '<button class="admin-fbtn'+(f==='all'?' afl':'')+'" onclick="STATE.adminFilter=\'all\';render()">All</button>';
+  html += '<button class="admin-fbtn'+(f==='subscribed'?' afl':'')+'" onclick="STATE.adminFilter=\'subscribed\';render()">Subscribed</button>';
+  html += '<button class="admin-fbtn'+(f==='cancelled'?' afl':'')+'" onclick="STATE.adminFilter=\'cancelled\';render()">Cancelled</button>';
+  html += '<button class="admin-fbtn'+(f==='active'?' afl':'')+'" onclick="STATE.adminFilter=\'active\';render()">Most Active</button>';
+  html += '</div>';
+  html += '<div class="admin-ulist">';
+  if (list.length === 0) {
+    html += '<div class="admin-empty">No users in this category</div>';
+  } else {
+    list.forEach(function(u) {
+      var usage = (u.stencils_used||0)+(u.enhancements_used||0)+(u.generations_used||0);
+      var pb = u.plan==='pro'?'abp':u.plan==='studio'?'abs':'abf';
+      var sd = u.cancelled?'adr':u.subscribed?'adg':'adgr';
+      var uid = (u.id||u.email||'').replace(/'/g,'');
+      html += '<div class="admin-urow">';
+      html += '<div class="admin-umain">';
+      html += '<span class="admin-dot '+sd+'"></span>';
+      html += '<div class="admin-uinfo">';
+      html += '<div class="admin-uemail">'+(u.email||'Unknown')+'</div>';
+      html += '<div class="admin-umeta">';
+      html += '<span class="admin-badge '+pb+'">'+(u.plan||'free').toUpperCase()+'</span>';
+      if (u.role==='admin') html += '<span class="admin-badge asuper">SUPER USER</span>';
+      html += '<span class="admin-mtxt">Uses:'+usage+'</span>';
+      if (u.cancelled) html += '<span class="admin-mtxt ared">Cancelled</span>';
+      if (u.subscribed&&!u.cancelled) html += '<span class="admin-mtxt agreen">&#163;'+(pp[u.plan]||0).toFixed(2)+'/mo</span>';
+      html += '</div></div></div>';
+      html += '<button class="admin-delbtn" onclick="adminDeleteUser(\''+uid+'\')">&#128465;</button>';
+      html += '</div>';
+    });
+  }
+  html += '</div></div>';
+  return html;
 }
 
 function renderPaywall() {
@@ -2248,17 +2248,15 @@ function doLogout() {
 
 // ── ATTACH EVENTS ────────────────────────────────────────────────────────────
 
-async function adminDeleteUser(userId) {
-  if (!confirm('Delete this account permanently? This cannot be undone.')) return;
-  STATE.users = (STATE.users||[]).filter(function(u) { return (u.id||u.email) !== userId; });
+async function adminDeleteUser(uid) {
+  if (!confirm('Delete this account permanently? Cannot be undone.')) return;
+  STATE.users = (STATE.users||[]).filter(function(u){ return (u.id||u.email||'') !== uid; });
   render();
   showToast('Account deleted', 'success');
 }
 async function deleteMyAccount() {
-  if (!confirm('Permanently delete your account? All data will be lost. This cannot be undone.')) return;
-  STATE.user = null;
-  STATE.page = 'auth';
-  render();
+  if (!confirm('Delete your account permanently? All data will be lost.')) return;
+  STATE.user = null; STATE.page = 'auth'; render();
   showToast('Account deleted', 'success');
 }
 function attachEvents() {
