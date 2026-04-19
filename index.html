@@ -1494,50 +1494,43 @@ async function generateStencil(){
     ctx.drawImage(img,ox,oy,sw,sh);
     if(hasRep){
       try{
-        var edgeUrl=null;
-        try{
-          await loadOpenCV();
-          if(typeof cv!=='undefined'&&cv.Mat){
-            ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);ctx.drawImage(img,ox,oy,sw,sh);
-            edgeUrl=opencvEdgesFaithful(canvas,mode);
-          }
-        }catch(cvE){}
-        if(!edgeUrl){ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);ctx.drawImage(img,ox,oy,sw,sh);edgeUrl=canvas.toDataURL('image/png');}
-        var mp={
-          simple:'tattoo stencil, bold thick outlines only, pure solid black lines on pure white background, thermal transfer print, NO shading NO grey NO fill',
-          moderate:'professional tattoo stencil, clean precise linework, bold outer lines with fine inner detail lines, pure black ink on white, thermal transfer quality, no shading no fill no grey',
-          expert:'master tattoo stencil, 3 distinct line weights, exact faithful linework, pure black lines on white paper, thermal transfer ready, no fill no shading no color'
+        // Prepare source image as data URL (1024x1024 with white pad) for Nano Banana
+        var srcDataUrl=canvas.toDataURL('image/png');
+        // Mode-specific line art prompts for google/nano-banana-2
+        var bananaPrompts={
+          simple:'Convert this photograph into a clean tattoo stencil line drawing. Pure black continuous outlines on pure white background. Bold confident single-weight lines tracing only the main contours and key features. Remove all shading, gradients, color, grey tones, and fills. The result must look like a printable tattoo stencil — crisp vector-style line art, nothing else. No watermark, no text, no signature.',
+          moderate:'Convert this photograph into a professional tattoo stencil line drawing. Clean black lines on pure white background. Use varied line weights — thicker bold outlines for main features (face contour, jawline, major shapes) and thinner lines for interior detail (eyes, lips, individual hair strands). Preserve all key shapes and flourishes as continuous flowing curves. No shading, no grey, no color, no fill — only black lines on white. Printable tattoo stencil, thermal transfer ready. No watermark, no text.',
+          expert:'Convert this photograph into a master-level tattoo stencil line drawing in the style of professional tattoo artists. Pure black ink lines on pure white paper. Use three distinct line weights: thick bold for primary outlines, medium for secondary features, fine for intricate detail (individual eyelashes, lip texture, hair strands, decorative flourishes). Redraw all features as clean continuous vector-style curves — do not trace photographic edges. Include dashed or implied construction lines where appropriate for shading guidance. Zero grey, zero color, zero fill, zero gradient. Stencil must be ready for thermal transfer to skin. No watermark, no signature, no text.'
         };
-        var output=await callReplicate('black-forest-labs/flux-canny-pro',{
-          control_image:edgeUrl,
-          prompt:mp[mode]||mp.moderate,
-          negative_prompt:'shading, grey, gradient, color, fill, texture, skin, background, noise, blur, watermark',
-          num_inference_steps:30,guidance:50,output_format:'png',output_quality:100,safety_tolerance:6
+        var bananaPrompt=bananaPrompts[mode]||bananaPrompts.moderate;
+        var output=await callReplicate('google/nano-banana-2',{
+          prompt:bananaPrompt,
+          image_input:[srcDataUrl],
+          output_format:'png',
+          aspect_ratio:'match_input_image'
         });
         var aiUrl=Array.isArray(output)?output[0]:output;
         var aiImg=new Image();aiImg.crossOrigin='anonymous';
         await new Promise(function(res,rej){aiImg.onload=res;aiImg.onerror=rej;aiImg.src=aiUrl;});
-        ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);ctx.drawImage(aiImg,0,0,SIZE,SIZE);
+        // Resize output to 1024 square white canvas
+        canvas.width=SIZE;canvas.height=SIZE;
+        ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);
+        var osc=Math.min(SIZE/aiImg.width,SIZE/aiImg.height);
+        var osw=Math.round(aiImg.width*osc),osh=Math.round(aiImg.height*osc);
+        var oox=Math.round((SIZE-osw)/2),ooy=Math.round((SIZE-osh)/2);
+        ctx.drawImage(aiImg,oox,ooy,osw,osh);
+        // Threshold to pure black/white for true stencil output
         var final=null;
-        if(typeof cv!=='undefined'&&cv.Mat){
-          try{
-            var s2=cv.imread(canvas),g2=new cv.Mat();
-            cv.cvtColor(s2,g2,cv.COLOR_RGBA2GRAY);
-            var bn=new cv.Mat();
-            cv.threshold(g2,bn,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU);
-            var k=cv.getStructuringElement(cv.MORPH_ELLIPSE,new cv.Size(2,2));
-            var cl=new cv.Mat();cv.morphologyEx(bn,cl,cv.MORPH_OPEN,k);
-            var r2=new cv.Mat();cv.cvtColor(cl,r2,cv.COLOR_GRAY2RGBA);
-            cv.imshow(canvas,r2);
-            [s2,g2,bn,k,cl,r2].forEach(function(m){try{m.delete();}catch(e){}});
-            final=canvas.toDataURL('image/png');
-          }catch(e){}
-        }
-        if(!final){
+        try{
           var d=ctx.getImageData(0,0,SIZE,SIZE),out=new ImageData(SIZE,SIZE);
-          for(var i=0;i<SIZE*SIZE;i++){var lm=0.2126*d.data[i*4]+0.7152*d.data[i*4+1]+0.0722*d.data[i*4+2];var ink=lm<180;out.data[i*4]=ink?0:255;out.data[i*4+1]=ink?0:255;out.data[i*4+2]=ink?0:255;out.data[i*4+3]=255;}
-          ctx.putImageData(out,0,0);final=canvas.toDataURL('image/png');
-        }
+          for(var i=0;i<SIZE*SIZE;i++){
+            var lm=0.2126*d.data[i*4]+0.7152*d.data[i*4+1]+0.0722*d.data[i*4+2];
+            var ink=lm<200;
+            out.data[i*4]=ink?0:255;out.data[i*4+1]=ink?0:255;out.data[i*4+2]=ink?0:255;out.data[i*4+3]=255;
+          }
+          ctx.putImageData(out,0,0);
+          final=canvas.toDataURL('image/png');
+        }catch(e){final=canvas.toDataURL('image/png');}
         STATE.stencilOutput=final;STATE.stencilLoading=false;render();showToast('AI stencil generated!','success');return;
       }catch(repErr){console.error('Stencil AI error:',repErr);showToast('AI error — using local: '+repErr.message,'error');}
     }
