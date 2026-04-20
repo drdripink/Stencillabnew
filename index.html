@@ -1107,17 +1107,12 @@ function renderStencil() {
       '<div class="stencil-right">' +
         '<div class="section-label">OUTPUT</div>' +
         (hasOutput ?
-          '<div class="output-image-wrap">' +
-            '<img src="' + STATE.stencilOutput + '" class="stencil-output-img" />' +
-          '</div>' +
-          '<div class="output-actions">' +
+          '<div class="output-image-wrap"><img src="' + STATE.stencilOutput + '" class="stencil-output-img" /></div>' +
+          '<div class="output-actions" style="margin-top:14px">' +
             '<a href="' + STATE.stencilOutput + '" download="stencil.png" class="dl-btn">&#8595; DOWNLOAD</a>' +
             '<button class="new-btn" id="new-stencil-btn">NEW</button>' +
-          '</div>'
-          :
-          '<div class="output-placeholder">' +
-            '<div class="output-placeholder-text">STENCIL APPEARS HERE</div>' +
-          '</div>') +
+          '</div>' :
+          '<div class="output-placeholder"><div class="output-placeholder-text">STENCIL APPEARS HERE</div></div>') +
       '</div>' +
     '</div>' +
   '</div>';
@@ -1543,22 +1538,26 @@ async function generateStencil(){
   if(!STATE.stencilInput||STATE.stencilLoading)return;
   STATE.stencilLoading=true;
   STATE.stencilOutput=null;
+  STATE.stencilRawOutput=null;
   render();
   try{
     var repKey=STATE.replicateKey;
     var hasRep=repKey&&repKey.trim().length>=10&&repKey!=='PASTE_YOUR_REPLICATE_KEY_HERE';
     var apiKey=STATE.apiKey;
     var hasApi=apiKey&&apiKey.trim().length>10&&apiKey!=='PASTE_YOUR_ANTHROPIC_API_KEY_HERE';
-    if(!hasRep&&!hasApi){throw new Error('No AI key configured — add your API key in Settings');}
+
+    if(!hasRep&&!hasApi){
+      throw new Error('No AI key configured — add your API key in Settings');
+    }
 
     var result=null;
 
-    // Professional tattoo stencil prompt
-    var stencilPrompt='Create a professional tattoo stencil from this reference image. Convert into clean precise black linework on pure white background. Faithfully trace every element: individual hair strands, eyelashes, eyebrows, facial features, lips, nose, skin contour lines, clothing, jewelry, tears, and all fine texture details. Use bold outer contour lines and finer inner detail lines for proper tattoo line hierarchy. Include light dotwork or fine hatching only to indicate shadow placement — do not fill or shade. Keep all lines smooth, continuous, and stencil-ready. Preserve the exact composition, expression, and all organic elements from the reference. Remove noise but retain all intentional detail. Output: high-resolution black linework on pure white, ready for tattoo transfer.';
+    // Professional tattoo stencil prompt — optimised for clean linework output
+    var stencilPrompt='Create a professional tattoo stencil from this reference image. Output clean black linework on pure white background. Faithfully trace ALL elements present in the reference: individual hair strands, eyelashes, brows, lips, nose, skin contours, tears, jewelry, clothing, and every compositional detail. Use thin continuous black lines throughout — no fills, no solid black areas, no heavy masses. Apply fine stippling or hatching ONLY to indicate shadow zones and shading direction (do not fill). Bold clean outlines for primary features, finer lines for texture and detail. Preserve emotional expression, facial proportions, and the exact composition of the reference. All lines must be smooth, precise, and tattoo-transfer ready. High contrast black on white only.';
 
     if(hasRep){
       try{
-        // Prep source image as 1024 white-padded canvas
+        // Prepare 1024 white-padded canvas
         var img=new Image();img.crossOrigin='anonymous';
         await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=STATE.stencilInput;});
         var S=1024;
@@ -1575,31 +1574,52 @@ async function generateStencil(){
           output_format:'png',
           aspect_ratio:'match_input_image'
         });
-        // Use raw AI output DIRECTLY — no canvas post-processing
-        result=Array.isArray(output)?output[0]:output;
+        var rawUrl=Array.isArray(output)?output[0]:output;
+        STATE.stencilRawOutput=rawUrl;
+
+        // Threshold post-process — 160 = clean thin lines, preserves fine detail
+        var aiImg=new Image();aiImg.crossOrigin='anonymous';
+        await new Promise(function(res,rej){aiImg.onload=res;aiImg.onerror=rej;aiImg.src=rawUrl;});
+        var out=document.createElement('canvas');out.width=out.height=S;
+        var oc=out.getContext('2d');oc.fillStyle='#fff';oc.fillRect(0,0,S,S);
+        var os=Math.min(S/aiImg.width,S/aiImg.height);
+        oc.drawImage(aiImg,Math.round((S-aiImg.width*os)/2),Math.round((S-aiImg.height*os)/2),Math.round(aiImg.width*os),Math.round(aiImg.height*os));
+        var od=oc.getImageData(0,0,S,S);var opx=od.data;
+        for(var i=0;i<opx.length;i+=4){
+          var lum=0.299*opx[i]+0.587*opx[i+1]+0.114*opx[i+2];
+          var v=lum<160?0:255;opx[i]=opx[i+1]=opx[i+2]=v;opx[i+3]=255;
+        }
+        oc.putImageData(od,0,0);
+        result=out.toDataURL('image/png');
       }catch(repErr){
-        if(hasApi){showToast('Switching to Claude AI...','info');}
-        else{throw repErr;}
+        console.warn('Replicate failed:',repErr.message);
+        if(!hasApi) throw new Error('Stencil generation failed — please try again');
+        showToast('Switching to Claude AI...','info');
       }
     }
 
     if(!result&&hasApi){
+      // Claude SVG path — mobile fallback, no canvas
       var imgData=await imageToBase64(STATE.stencilInput);
       var mime=(imgData&&imgData.mime)?imgData.mime:'image/jpeg';
       var b64=(imgData&&imgData.b64)?imgData.b64:imgData;
       var msgs=[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:mime,data:b64}},
-        {type:'text',text:stencilPrompt+' Reply with ONLY a complete SVG element. viewBox="0 0 512 512", white background, black strokes only.'}
+        {type:'text',text:stencilPrompt+' Reply with ONLY a complete SVG element. viewBox="0 0 512 512", pure white background rect, thin black strokes only, no fills.'}
       ]}];
       var resp=await callClaude(msgs,4000);
       var s=resp.indexOf('<svg'),e=resp.lastIndexOf('</svg>');
-      if(s>=0&&e>s){result=URL.createObjectURL(new Blob([resp.slice(s,e+6)],{type:'image/svg+xml'}));}
-      else{throw new Error('Generation failed — try again');}
+      if(s>=0&&e>s){
+        result=URL.createObjectURL(new Blob([resp.slice(s,e+6)],{type:'image/svg+xml'}));
+        STATE.stencilRawOutput=result;
+      }else{
+        throw new Error('Generation failed — please try again');
+      }
     }
 
     STATE.stencilOutput=result;
-    STATE.stencilRawOutput=result;
     STATE.stencilLoading=false;
+    STATE.baPosition=50;
     render();
   }catch(err){
     STATE.stencilLoading=false;render();
@@ -2041,7 +2061,9 @@ function deleteMyAccount() {
 }
 
 
-function wireStencilSliders() { /* sliders removed */ }
+function wireStencilSliders() {
+  // No sliders — removed for clean stencil output
+}
 
 function attachEvents() {
   // Wire new stencil UI controls
