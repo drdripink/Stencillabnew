@@ -1039,7 +1039,7 @@ function renderStencil() {
     {id:'expert',   label:'EXPERT',   tag:'FULL DETAIL',   desc:'All detail, blend zones, complete tonal map',  cls:'active-expert',   color:'var(--accent)'}
   ];
   var html = '<div class="page-header"><div class="page-title">STENCIL <span>GENERATOR</span></div>';
-  html += '<div class="page-subtitle">Professional AI-powered tattoo stencils &bull; ' + (STATE.replicateKey && STATE.replicateKey.length>10 && !STATE.replicateKey.includes('PASTE') ? '<span style="color:#aaa">&#9679; ControlNet AI active</span>' : '<span style="color:#555">&#9679; Canvas mode (add Replicate key for AI)</span>') + '</div></div>';
+  html += '<div class="page-subtitle">Professional AI-powered tattoo stencils &bull; ' + (STATE.replicateKey && STATE.replicateKey.length>10 && !STATE.replicateKey.includes('PASTE') ? '<span style="color:#aaa">&#9679; ControlNet AI active</span>' : '<span style="color:#555">&#9679; Add API key in Settings</span>') + '</div></div>';
   html += '<div class="grid-2">';
 
   // Left
@@ -1536,105 +1536,79 @@ async function generateStencil(){
     var apiKey=STATE.apiKey;
     var hasApi=apiKey&&apiKey.trim().length>10&&apiKey!=='PASTE_YOUR_ANTHROPIC_API_KEY_HERE';
 
-    // Load + prep source image on 1024 white canvas
-    var img=new Image();
-    img.crossOrigin='anonymous';
-    await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=STATE.stencilInput;});
-    var S=1024;
-    var src=document.createElement('canvas');src.width=src.height=S;
-    var sx=src.getContext('2d');sx.fillStyle='#fff';sx.fillRect(0,0,S,S);
-    var scale=Math.min(S/img.width,S/img.height);
-    var sw=Math.round(img.width*scale),sh=Math.round(img.height*scale);
-    var ox=Math.round((S-sw)/2),oy=Math.round((S-sh)/2);
-    sx.drawImage(img,ox,oy,sw,sh);
-    var srcDataUrl=src.toDataURL('image/png');
+    if(!hasRep&&!hasApi){
+      throw new Error('No AI key configured — add your API key in Settings');
+    }
 
     var result=null;
 
     if(hasRep){
       try{
-        // STRICT prompts — extract only what exists, add NOTHING new
+        // Load image onto 1024 white canvas for clean input
+        var img=new Image();img.crossOrigin='anonymous';
+        await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=STATE.stencilInput;});
+        var S=1024;
+        var src=document.createElement('canvas');src.width=src.height=S;
+        var sx=src.getContext('2d');sx.fillStyle='#fff';sx.fillRect(0,0,S,S);
+        var scale=Math.min(S/img.width,S/img.height);
+        var sw=Math.round(img.width*scale),sh=Math.round(img.height*scale);
+        sx.drawImage(img,Math.round((S-sw)/2),Math.round((S-sh)/2),sw,sh);
+        var srcDataUrl=src.toDataURL('image/png');
+
         var bananaPrompts={
-          SIMPLE:'Extract the outline contours of this image as a clean tattoo stencil. Trace ONLY the edges and outlines that actually exist in this exact image. Do NOT add any new elements, frames, decorations, text, or backgrounds. Pure black lines on pure white background. Faithful line extraction only.',
-          MODERATE:'Extract all edges and lines from this image as a tattoo stencil. Trace EXACTLY what is in this image — every hair strand, every facial feature, every element. Do NOT invent or add anything new. No frames, no decorations, no extra elements. Black lines on white background only.',
-          EXPERT:'Create a master tattoo stencil by tracing every single line, edge, and detail from this exact image. Copy the composition exactly as shown. Do NOT add any new elements, decorative borders, frames, text, or flourishes. Extract ONLY what is already in the image. Pure black linework on white.'
+          SIMPLE:'Extract the outlines from this image as a tattoo stencil. Trace ONLY what exists in this exact image. Pure black lines on white. No new elements, no decorations, no frames, no text.',
+          MODERATE:'Extract all lines and edges from this image as a tattoo stencil. Faithfully trace every element that exists. Black lines on white only. Do NOT invent anything new.',
+          EXPERT:'Extract every fine detail and line from this image as a tattoo stencil. Trace exactly what is shown. Black linework on white. Do NOT add any new elements whatsoever.'
         };
-        var bananaPrompt=bananaPrompts[mode]||bananaPrompts.SIMPLE;
         var output=await callReplicate('google/nano-banana-2',{
-          prompt:bananaPrompt,
+          prompt:bananaPrompts[mode]||bananaPrompts.SIMPLE,
           image_input:[srcDataUrl],
           output_format:'png',
           aspect_ratio:'match_input_image'
         });
         var rawUrl=Array.isArray(output)?output[0]:output;
-        // Post-process: load result, threshold to pure black/white
+
+        // Threshold to pure black/white
         var aiImg=new Image();aiImg.crossOrigin='anonymous';
         await new Promise(function(res,rej){aiImg.onload=res;aiImg.onerror=rej;aiImg.src=rawUrl;});
         var out=document.createElement('canvas');out.width=out.height=S;
-        var octx=out.getContext('2d');octx.fillStyle='#fff';octx.fillRect(0,0,S,S);
-        var oscale=Math.min(S/aiImg.width,S/aiImg.height);
-        var osw=Math.round(aiImg.width*oscale),osh=Math.round(aiImg.height*oscale);
-        var oox=Math.round((S-osw)/2),ooy=Math.round((S-osh)/2);
-        octx.drawImage(aiImg,oox,ooy,osw,osh);
-        var od=octx.getImageData(0,0,S,S);var opx=od.data;
-        var thresh=mode==='SIMPLE'?160:mode==='MODERATE'?128:100;
-        for(var i=0;i<opx.length;i+=4){
-          var lum=0.299*opx[i]+0.587*opx[i+1]+0.114*opx[i+2];
-          var v=lum<thresh?0:255;opx[i]=v;opx[i+1]=v;opx[i+2]=v;opx[i+3]=255;
-        }
-        octx.putImageData(od,0,0);
+        var oc=out.getContext('2d');oc.fillStyle='#fff';oc.fillRect(0,0,S,S);
+        var os=Math.min(S/aiImg.width,S/aiImg.height);
+        oc.drawImage(aiImg,Math.round((S-aiImg.width*os)/2),Math.round((S-aiImg.height*os)/2),Math.round(aiImg.width*os),Math.round(aiImg.height*os));
+        var od=oc.getImageData(0,0,S,S);var opx=od.data;
+        var t=mode==='SIMPLE'?160:mode==='MODERATE'?128:100;
+        for(var i=0;i<opx.length;i+=4){var v=(0.299*opx[i]+0.587*opx[i+1]+0.114*opx[i+2])<t?0:255;opx[i]=opx[i+1]=opx[i+2]=v;opx[i+3]=255;}
+        oc.putImageData(od,0,0);
         result=out.toDataURL('image/png');
-      }catch(repErr){console.warn('Replicate failed, using canvas:',repErr);}
+      }catch(repErr){
+        if(hasApi){
+          showToast('Switching to Claude AI...','info');
+        }else{
+          throw repErr;
+        }
+      }
     }
 
     if(!result&&hasApi){
-      // Claude path: ask for SVG line art
       var imgData=await imageToBase64(STATE.stencilInput);
       var mime=(imgData&&imgData.mime)?imgData.mime:'image/jpeg';
       var b64=(imgData&&imgData.b64)?imgData.b64:imgData;
       var claudePrompts={
-        SIMPLE:'Trace this image as a SIMPLE tattoo stencil SVG. Extract only the major outlines. Do NOT add any new elements.',
-        MODERATE:'Trace this image as a MODERATE tattoo stencil SVG. Extract all main lines and shadow edges. Do NOT add anything new.',
-        EXPERT:'Trace this image as an EXPERT tattoo stencil SVG. Extract every fine detail. Do NOT add any new elements.'
+        SIMPLE:'Trace this image as a SIMPLE tattoo stencil SVG. Major outlines only. Do NOT add anything new.',
+        MODERATE:'Trace this image as a MODERATE tattoo stencil SVG. Main lines and shadows. Do NOT add anything new.',
+        EXPERT:'Trace this image as an EXPERT tattoo stencil SVG. Every fine detail. Do NOT add anything new.'
       };
       var msgs=[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:mime,data:b64}},
-        {type:'text',text:claudePrompts[mode]+' Reply with ONLY a complete SVG element. viewBox="0 0 512 512", white background rect, black strokes only, no fills except background.'}
+        {type:'text',text:claudePrompts[mode]+' Reply with ONLY a complete SVG. viewBox="0 0 512 512", white background, black strokes only.'}
       ]}];
       var resp=await callClaude(msgs,4000);
-      var svgStart=resp.indexOf('<svg');var svgEnd=resp.lastIndexOf('</svg>');
-      if(svgStart>=0&&svgEnd>svgStart){
-        var blob=new Blob([resp.slice(svgStart,svgEnd+6)],{type:'image/svg+xml'});
-        result=URL.createObjectURL(blob);
-      }else{throw new Error('No SVG — try again');}
-    }
-
-    if(!result){
-      // Canvas Canny edge detection fallback — faithful line extraction, no hallucination
-      var gs=document.createElement('canvas');gs.width=gs.height=S;
-      var gc=gs.getContext('2d');gc.drawImage(img,ox,oy,sw,sh);
-      var gd=gc.getImageData(0,0,S,S);var gpx=gd.data;
-      // Step 1: Grayscale
-      for(var p=0;p<gpx.length;p+=4){var g=0.299*gpx[p]+0.587*gpx[p+1]+0.114*gpx[p+2];gpx[p]=gpx[p+1]=gpx[p+2]=g;}
-      gc.putImageData(gd,0,0);
-      // Step 2: Sobel edge detection
-      var ed=gc.getImageData(0,0,S,S);var ep=new Uint8ClampedArray(ed.data);
-      var src2=gd.data;
-      for(var y=1;y<S-1;y++){for(var x=1;x<S-1;x++){
-        var idx=(y*S+x)*4;
-        var tl=src2[((y-1)*S+(x-1))*4],tm=src2[((y-1)*S+x)*4],tr=src2[((y-1)*S+(x+1))*4];
-        var ml=src2[(y*S+(x-1))*4],mr=src2[(y*S+(x+1))*4];
-        var bl=src2[((y+1)*S+(x-1))*4],bm=src2[((y+1)*S+x)*4],br=src2[((y+1)*S+(x+1))*4];
-        var gx=(-tl-2*ml-bl+tr+2*mr+br);
-        var gy=(-tl-2*tm-tr+bl+2*bm+br);
-        var mag=Math.min(255,Math.sqrt(gx*gx+gy*gy)*1.5);
-        var edgePx=mag>40?0:255; // dark edge = black line
-        ep[idx]=ep[idx+1]=ep[idx+2]=edgePx;ep[idx+3]=255;
-      }}
-      var res=document.createElement('canvas');res.width=res.height=S;
-      var rc=res.getContext('2d');rc.fillStyle='#fff';rc.fillRect(0,0,S,S);
-      ed.data.set(ep);rc.putImageData(ed,0,0);
-      result=res.toDataURL('image/png');
+      var s=resp.indexOf('<svg'),e=resp.lastIndexOf('</svg>');
+      if(s>=0&&e>s){
+        result=URL.createObjectURL(new Blob([resp.slice(s,e+6)],{type:'image/svg+xml'}));
+      }else{
+        throw new Error('Generation failed — try again');
+      }
     }
 
     STATE.stencilOutput=result;
