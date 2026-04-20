@@ -1084,7 +1084,6 @@ function renderProfile() {
 // ── STENCIL ─────────────────────────────────────────────────────────────────
 function renderStencil() {
   var hasOutput = !!STATE.stencilOutput;
-  var detail = STATE.stencilDetail !== undefined ? STATE.stencilDetail : 80;
   var thick = STATE.stencilThickness !== undefined ? STATE.stencilThickness : 50;
   return '<div class="stencil-wrap">' +
     '<div class="stencil-header">' +
@@ -1117,16 +1116,10 @@ function renderStencil() {
           '</div>') +
         (hasOutput ? '<div class="stencil-sliders">' +
           '<div class="slider-row">' +
-            '<div class="slider-label-row"><span class="slider-label">DETAIL</span><span class="slider-value">' + detail + '%</span></div>' +
-            '<div class="slider-track-row"><span class="slider-hint-left">Clean</span>' +
-              '<input type="range" class="stencil-slider" id="slider-detail" min="0" max="100" value="' + detail + '" />' +
-            '<span class="slider-hint-right">Expert</span></div>' +
-          '</div>' +
-          '<div class="slider-row">' +
-            '<div class="slider-label-row"><span class="slider-label">BOLDNESS</span><span class="slider-value">' + thick + '%</span></div>' +
-            '<div class="slider-track-row"><span class="slider-hint-left">Fine</span>' +
+            '<div class="slider-label-row"><span class="slider-label">LINE THICKNESS</span><span class="slider-value">' + thick + '%</span></div>' +
+            '<div class="slider-track-row"><span class="slider-hint-left">Thin</span>' +
               '<input type="range" class="stencil-slider" id="slider-thick" min="0" max="100" value="' + thick + '" />' +
-            '<span class="slider-hint-right">Bold</span></div>' +
+            '<span class="slider-hint-right">Thick</span></div>' +
           '</div>' +
           '<div class="output-actions">' +
             '<a href="' + STATE.stencilOutput + '" download="stencil.png" class="dl-btn">&#8595; DOWNLOAD</a>' +
@@ -1577,9 +1570,9 @@ async function generateStencil(){
         var srcDataUrl=canvas.toDataURL('image/png');
         // Mode-specific line art prompts for google/nano-banana-2
         var bananaPrompts={
-          simple:'Convert this image into a simple tattoo stencil. Thin clean black outlines only on pure white. No fills, no shading, no grey.',
-          moderate:'Convert this image into a moderate tattoo stencil. Thin clean black lines on pure white. Capture main features and outlines.',
-          expert:'Convert this image into a professional tattoo stencil line drawing. Use ONLY ultra-thin precise black hairlines on pure white. Faithfully trace every single element from the reference: all individual hair strands, eyelashes, eyebrows, lips, nose, skin contour lines, clothing folds, jewelry, tears, and all fine texture details. THIN lines only — no thick fills, no heavy black areas, no solid masses. Every line must be a single thin stroke. Capture maximum detail with minimum line weight. Pure black on pure white only.'
+          simple:'Create a professional tattoo stencil from the provided reference image. Convert the artwork into clean black linework while preserving all important facial features, expression, and composition. Use bold outer lines and thinner inner lines. Ensure all lines are smooth, stencil-ready, and high contrast (black on white). Output as a high-resolution tattoo stencil.',
+          moderate:'Create a professional tattoo stencil from the provided reference image. Convert the artwork into clean black linework while preserving all important facial features, expression, and composition. Include clear shading guides using fine line hatching or light dashed contour lines to indicate shadow placement. Use bold outer lines and thinner inner lines. Ensure all lines are smooth, stencil-ready, and high contrast (black on white).',
+          expert:'Create a professional tattoo stencil from the provided reference image. Convert the artwork into clean black linework while preserving all important facial features, expression, and composition. Include clear shading guides using stippling/dot shading guides for soft facial gradients, fine line hatching, or light dashed contour lines to indicate shadow placement (do not fully shade, only map it). Maintain the original shading patterns and flow from the reference, especially around the eyes, nose, lips, and organic elements. Preserve emotional expression and tear/shadow flow under the eyes. Use bold outer lines and thinner inner lines to create proper tattoo line hierarchy. Keep organic elements (hair, leaves, shapes) fluid but readable for stencil transfer. Simplify overly complex or messy lines while keeping the design recognizable and balanced. Avoid overfilling — prioritize skin-readable spacing and longevity. Ensure all lines are smooth, stencil-ready, and high contrast (black on white). Remove unnecessary noise but retain intentional texture and shading direction. Output as a high-resolution tattoo stencil with visible shading markers for artist guidance.'
         };
         var bananaPrompt=bananaPrompts.expert;// always expert quality
         var output=await callReplicate('google/nano-banana-2',{
@@ -2107,26 +2100,13 @@ function deleteMyAccount() {
 
 
 function wireStencilSliders() {
-  var dSlider = document.getElementById('slider-detail');
   var tSlider = document.getElementById('slider-thick');
-  if (dSlider) {
-    dSlider.oninput = function() {
-      STATE.stencilDetail = parseInt(this.value);
-      // Update value display live
-      var lbl = this.closest('.slider-row').querySelector('.slider-value');
-      if (lbl) lbl.textContent = this.value + '%';
-      // Update gradient
-      this.style.background = 'linear-gradient(to right,var(--neon) 0%,var(--neon) ' + this.value + '%,var(--border) ' + this.value + '%,var(--border) 100%)';
-      clearTimeout(window.__sliderTimer);
-      window.__sliderTimer = setTimeout(function(){ adjustIntensity(); }, 300);
-    };
-  }
   if (tSlider) {
     tSlider.oninput = function() {
       STATE.stencilThickness = parseInt(this.value);
       var lbl = this.closest('.slider-row').querySelector('.slider-value');
       if (lbl) lbl.textContent = this.value + '%';
-      this.style.background = 'linear-gradient(to right,var(--neon) 0%,var(--neon) ' + this.value + '%,var(--border) ' + this.value + '%,var(--border) 100%)';
+      this.style.background = 'linear-gradient(to right,#ffffff 0%,#ffffff ' + this.value + '%,#333333 ' + this.value + '%,#333333 100%)';
       clearTimeout(window.__sliderTimer);
       window.__sliderTimer = setTimeout(function(){ adjustIntensity(); }, 300);
     };
