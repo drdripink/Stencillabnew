@@ -1536,124 +1536,74 @@ function opencvEdges(canvas, mode){
 }
 async function generateStencil(){
   if(!STATE.stencilInput||STATE.stencilLoading)return;
-  STATE.stencilLoading=true;
-  STATE.stencilOutput=null;
-  STATE.stencilRawOutput=null;
-  render();
+  STATE.stencilLoading=true;STATE.stencilEdges=null;render();
+  var mode=STATE.stencilSettings.level;
+  var hasRep=STATE.replicateKey&&STATE.replicateKey.length>10&&!STATE.replicateKey.includes('PASTE');
   try{
-    var repKey=STATE.replicateKey;
-    var hasRep=repKey&&repKey.trim().length>=10&&repKey!=='PASTE_YOUR_REPLICATE_KEY_HERE';
-    var apiKey=STATE.apiKey;
-    var hasApi=apiKey&&apiKey.trim().length>10&&apiKey!=='PASTE_YOUR_ANTHROPIC_API_KEY_HERE';
-
-    if(!hasRep&&!hasApi){
-      throw new Error('No AI key configured — add your API key in Settings');
-    }
-
-    var result=null;
-
-    // Professional tattoo stencil prompt — optimised for clean linework output
-    var stencilPrompt='Convert this reference image into a professional tattoo stencil. Style: clean fine-line blackwork with fluid organic linework. Black lines on pure white background only. Trace every element with precision: draw each individual hair strand as a separate flowing line following the natural direction of the hair — lines must flow parallel and never cross randomly. Facial features must be fully detailed: trace all eyelashes individually, define the iris, eyebrows, nose bridge, nostril curves, lip edges and cupid bow, chin contour. On the face use sparse dashed contour lines only to indicate shadow zones (cheeks, under-eyes, nose sides) — keep face area clean with minimal lines. Hands, fingers, jewelry and all clothing elements must be carefully traced. All linework must follow the natural form and flow of the subject — lines that describe hair all flow in the same direction, face contours curve with the anatomy. Line weight: thin and consistent throughout — no thick fills, no solid black areas. The result must look like a professional hand-drawn tattoo line art with high detail, clean spacing between lines, and every stroke intentional. Do not simplify important features. Do not add random crossing lines. Do not fill any areas. Output: high resolution black and white tattoo stencil ready for transfer.';
-
+    var img=new Image();
+    await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=STATE.stencilInput;});
+    var SIZE=1024;
+    var canvas=document.getElementById('stencilCanvas');
+    canvas.width=SIZE;canvas.height=SIZE;
+    var ctx=canvas.getContext('2d');
+    var sc=Math.min(SIZE/img.width,SIZE/img.height);
+    var sw=Math.round(img.width*sc),sh=Math.round(img.height*sc);
+    var ox=Math.round((SIZE-sw)/2),oy=Math.round((SIZE-sh)/2);
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.drawImage(img,ox,oy,sw,sh);
     if(hasRep){
       try{
-        // Prepare 1024 white-padded canvas
-        var img=new Image();img.crossOrigin='anonymous';
-        await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=STATE.stencilInput;});
-        var S=1024;
-        var src=document.createElement('canvas');src.width=src.height=S;
-        var sx=src.getContext('2d');sx.fillStyle='#fff';sx.fillRect(0,0,S,S);
-        var scale=Math.min(S/img.width,S/img.height);
-        var sw=Math.round(img.width*scale),sh=Math.round(img.height*scale);
-        sx.drawImage(img,Math.round((S-sw)/2),Math.round((S-sh)/2),sw,sh);
-        var srcDataUrl=src.toDataURL('image/png');
-        // Pre-process: convert to pencil sketch so nano-banana gets line data
-        var sketchCanvas=document.createElement('canvas');sketchCanvas.width=sketchCanvas.height=S;
-        var skCtx=sketchCanvas.getContext('2d');
-        // Step 1: grayscale
-        skCtx.drawImage(img,Math.round((S-sw)/2),Math.round((S-sh)/2),sw,sh);
-        var gd=skCtx.getImageData(0,0,S,S);var gp=gd.data;
-        for(var gi=0;gi<gp.length;gi+=4){var gv=0.299*gp[gi]+0.587*gp[gi+1]+0.114*gp[gi+2];gp[gi]=gp[gi+1]=gp[gi+2]=gv;}
-        skCtx.putImageData(gd,0,0);
-        // Step 2: invert
-        var inv=document.createElement('canvas');inv.width=inv.height=S;
-        var invCtx=inv.getContext('2d');
-        invCtx.filter='invert(1)';invCtx.drawImage(sketchCanvas,0,0);
-        // Step 3: blur the inverted
-        var blurCanvas=document.createElement('canvas');blurCanvas.width=blurCanvas.height=S;
-        var blurCtx=blurCanvas.getContext('2d');
-        blurCtx.filter='blur(4px)';blurCtx.drawImage(inv,0,0);
-        // Step 4: color dodge blend = pencil sketch
-        var finalSketch=document.createElement('canvas');finalSketch.width=finalSketch.height=S;
-        var fsCtx=finalSketch.getContext('2d');
-        fsCtx.fillStyle='#fff';fsCtx.fillRect(0,0,S,S);
-        fsCtx.drawImage(sketchCanvas,0,0);
-        fsCtx.globalCompositeOperation='color-dodge';
-        fsCtx.drawImage(blurCanvas,0,0);
-        fsCtx.globalCompositeOperation='source-over';
-        // Step 5: boost contrast on sketch for cleaner lines
-        var sd=fsCtx.getImageData(0,0,S,S);var sp=sd.data;
-        for(var si=0;si<sp.length;si+=4){var sv=sp[si];var sc2=Math.min(255,Math.max(0,((sv-128)*2.5)+128));sp[si]=sp[si+1]=sp[si+2]=sc2;sp[si+3]=255;}
-        fsCtx.putImageData(sd,0,0);
-        var srcDataUrl=finalSketch.toDataURL('image/png');
-
+        // Prepare source image as data URL (1024x1024 with white pad) for Nano Banana
+        var srcDataUrl=canvas.toDataURL('image/png');
+        // Mode-specific line art prompts for google/nano-banana-2
+        var bananaPrompts={
+          simple:'Convert this photograph into a clean tattoo stencil line drawing. Pure black continuous outlines on pure white background. Bold confident single-weight lines tracing only the main contours and key features. Remove all shading, gradients, color, grey tones, and fills. The result must look like a printable tattoo stencil — crisp vector-style line art, nothing else. No watermark, no text, no signature.',
+          moderate:'Convert this photograph into a professional tattoo stencil line drawing. Clean black lines on pure white background. Use varied line weights — thicker bold outlines for main features (face contour, jawline, major shapes) and thinner lines for interior detail (eyes, lips, individual hair strands). Preserve all key shapes and flourishes as continuous flowing curves. No shading, no grey, no color, no fill — only black lines on white. Printable tattoo stencil, thermal transfer ready. No watermark, no text.',
+          expert:'Convert this photograph into a master-level tattoo stencil line drawing in the style of professional tattoo artists. Pure black ink lines on pure white paper. Use three distinct line weights: thick bold for primary outlines, medium for secondary features, fine for intricate detail (individual eyelashes, lip texture, hair strands, decorative flourishes). Redraw all features as clean continuous vector-style curves — do not trace photographic edges. Include dashed or implied construction lines where appropriate for shading guidance. Zero grey, zero color, zero fill, zero gradient. Stencil must be ready for thermal transfer to skin. No watermark, no signature, no text.'
+        };
+        var bananaPrompt=bananaPrompts[mode]||bananaPrompts.moderate;
         var output=await callReplicate('google/nano-banana-2',{
-          prompt:stencilPrompt,
+          prompt:bananaPrompt,
           image_input:[srcDataUrl],
           output_format:'png',
           aspect_ratio:'match_input_image'
         });
-        var rawUrl=Array.isArray(output)?output[0]:output;
-        STATE.stencilRawOutput=rawUrl;
-
-        // Threshold post-process — 160 = clean thin lines, preserves fine detail
+        var aiUrl=Array.isArray(output)?output[0]:output;
         var aiImg=new Image();aiImg.crossOrigin='anonymous';
-        await new Promise(function(res,rej){aiImg.onload=res;aiImg.onerror=rej;aiImg.src=rawUrl;});
-        var out=document.createElement('canvas');out.width=out.height=S;
-        var oc=out.getContext('2d');oc.fillStyle='#fff';oc.fillRect(0,0,S,S);
-        var os=Math.min(S/aiImg.width,S/aiImg.height);
-        oc.drawImage(aiImg,Math.round((S-aiImg.width*os)/2),Math.round((S-aiImg.height*os)/2),Math.round(aiImg.width*os),Math.round(aiImg.height*os));
-        var od=oc.getImageData(0,0,S,S);var opx=od.data;
-        for(var i=0;i<opx.length;i+=4){
-          var lum=0.299*opx[i]+0.587*opx[i+1]+0.114*opx[i+2];
-          var v=lum<170?0:255;opx[i]=opx[i+1]=opx[i+2]=v;opx[i+3]=255;
-        }
-        oc.putImageData(od,0,0);
-        result=out.toDataURL('image/png');
-      }catch(repErr){
-        console.warn('Replicate failed:',repErr.message);
-        if(!hasApi) throw new Error('Stencil generation failed — please try again');
-        showToast('Switching to Claude AI...','info');
-      }
+        await new Promise(function(res,rej){aiImg.onload=res;aiImg.onerror=rej;aiImg.src=aiUrl;});
+        // Resize output to 1024 square white canvas
+        canvas.width=SIZE;canvas.height=SIZE;
+        ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);
+        var osc=Math.min(SIZE/aiImg.width,SIZE/aiImg.height);
+        var osw=Math.round(aiImg.width*osc),osh=Math.round(aiImg.height*osc);
+        var oox=Math.round((SIZE-osw)/2),ooy=Math.round((SIZE-osh)/2);
+        ctx.drawImage(aiImg,oox,ooy,osw,osh);
+        // Threshold to pure black/white for true stencil output
+        var final=null;
+        try{
+          var d=ctx.getImageData(0,0,SIZE,SIZE),out=new ImageData(SIZE,SIZE);
+          for(var i=0;i<SIZE*SIZE;i++){
+            var lm=0.2126*d.data[i*4]+0.7152*d.data[i*4+1]+0.0722*d.data[i*4+2];
+            var ink=lm<200;
+            out.data[i*4]=ink?0:255;out.data[i*4+1]=ink?0:255;out.data[i*4+2]=ink?0:255;out.data[i*4+3]=255;
+          }
+          ctx.putImageData(out,0,0);
+          final=canvas.toDataURL('image/png');
+        }catch(e){final=canvas.toDataURL('image/png');}
+        STATE.stencilOutput=final;STATE.stencilLoading=false;render();showToast('AI stencil generated!','success');return;
+      }catch(repErr){console.error('Stencil AI error:',repErr);showToast('AI error — using local: '+repErr.message,'error');}
     }
-
-    if(!result&&hasApi){
-      // Claude SVG path — mobile fallback, no canvas
-      var imgData=await imageToBase64(STATE.stencilInput);
-      var mime=(imgData&&imgData.mime)?imgData.mime:'image/jpeg';
-      var b64=(imgData&&imgData.b64)?imgData.b64:imgData;
-      var msgs=[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:mime,data:b64}},
-        {type:'text',text:stencilPrompt+' Reply with ONLY a complete SVG element. viewBox="0 0 512 512", pure white background rect, thin black strokes only, no fills.'}
-      ]}];
-      var resp=await callClaude(msgs,4000);
-      var s=resp.indexOf('<svg'),e=resp.lastIndexOf('</svg>');
-      if(s>=0&&e>s){
-        result=URL.createObjectURL(new Blob([resp.slice(s,e+6)],{type:'image/svg+xml'}));
-        STATE.stencilRawOutput=result;
-      }else{
-        throw new Error('Generation failed — please try again');
-      }
-    }
-
-    STATE.stencilOutput=result;
-    STATE.stencilLoading=false;
-    STATE.baPosition=50;
-    render();
-  }catch(err){
-    STATE.stencilLoading=false;render();
-    showToast('Error: '+err.message,'error');
-  }
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);ctx.drawImage(img,ox,oy,sw,sh);
+    var cvR=null;
+    try{await loadOpenCV();if(typeof cv!=='undefined'&&cv.Mat)cvR=opencvEdgesFaithful(canvas,mode);}catch(e){}
+    if(cvR){STATE.stencilOutput=cvR;STATE.stencilLoading=false;render();showToast('Stencil generated!','success');return;}
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,SIZE,SIZE);ctx.drawImage(img,ox,oy,sw,sh);
+    var id=ctx.getImageData(0,0,SIZE,SIZE);
+    var res=processStencilPipeline(id,SIZE,SIZE,mode);
+    ctx.putImageData(res.pixels,0,0);STATE.stencilEdges=res.edges;
+    STATE.stencilOutput=canvas.toDataURL('image/png');
+    STATE.stencilLoading=false;render();showToast('Stencil generated!','success');
+  }catch(err){STATE.stencilLoading=false;render();showToast('Error: '+err.message,'error');}
 }
 
 function opencvEdgesFaithful(canvas,mode){
