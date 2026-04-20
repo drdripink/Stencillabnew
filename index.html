@@ -670,26 +670,26 @@ input[type=range]::-webkit-slider-thumb{
 .del-my-btn{background:transparent;border:1px solid #f87171;color:#f87171;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:1px;width:100%;margin-top:24px;transition:all .2s}
 .del-my-btn:hover{background:rgba(239,68,68,.1)}
 
-.create-stencil-btn{width:100%;padding:22px;background:var(--neon);color:#000;font-family:var(--font-heading);font-size:18px;font-weight:900;letter-spacing:4px;border:none;border-radius:10px;cursor:pointer;margin-top:14px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 24px rgba(255,255,255,.15)}
-.create-stencil-btn:hover:not(:disabled){background:var(--white);transform:translateY(-2px)}
-.create-stencil-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.create-stencil-btn.loading{background:var(--surface3);color:var(--grey-light)}
+.create-stencil-btn{width:100%;padding:22px;background:#ffffff;color:#050505;font-family:var(--font-heading);font-size:18px;font-weight:900;letter-spacing:4px;border:none;border-radius:10px;cursor:pointer;margin-top:14px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 24px rgba(255,255,255,.2)}
+.create-stencil-btn:hover:not(:disabled){background:#e8e8e8;transform:translateY(-2px)}
+.create-stencil-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.create-stencil-btn.loading{background:#1a1a1a;color:#aaaaaa}
 .stencil-sliders{margin-top:16px;display:flex;flex-direction:column;gap:16px}
 .slider-row{display:flex;flex-direction:column;gap:6px}
 .slider-label-row{display:flex;justify-content:space-between;align-items:center}
-.slider-label{font-family:var(--font-heading);font-size:11px;letter-spacing:2px;color:var(--white-dim)}
-.slider-value{font-family:var(--font-heading);font-size:13px;font-weight:700;color:var(--neon)}
+.slider-label{font-family:var(--font-heading);font-size:11px;letter-spacing:2px;color:#aaaaaa}
+.slider-value{font-family:var(--font-heading);font-size:13px;font-weight:700;color:#ffffff}
 .slider-track-row{display:flex;align-items:center;gap:10px}
-.slider-hint-left,.slider-hint-right{font-size:10px;color:var(--grey);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;min-width:36px}
+.slider-hint-left,.slider-hint-right{font-size:10px;color:#666666;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;min-width:36px}
 .slider-hint-right{text-align:right}
-.stencil-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(to right,var(--neon) 0%,var(--neon) 80%,var(--border) 80%,var(--border) 100%);outline:none;cursor:pointer}
-.stencil-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--white);border:3px solid var(--neon);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.stencil-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--white);border:3px solid var(--neon);cursor:pointer}
+.stencil-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(to right,#ffffff 0%,#ffffff 85%,#333333 85%,#333333 100%);outline:none;cursor:pointer}
+.stencil-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#ffffff;border:3px solid #ffffff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.stencil-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#ffffff;border:3px solid #ffffff;cursor:pointer}
 .output-actions{display:flex;gap:10px;margin-top:12px}
-.dl-btn{flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);color:var(--white-dim);font-family:var(--font-heading);font-size:13px;letter-spacing:2px;text-decoration:none;border-radius:8px;text-align:center;transition:all .2s}
-.dl-btn:hover{border-color:var(--neon);color:var(--neon)}
-.new-btn{padding:12px 20px;background:transparent;border:1px solid var(--border);color:var(--grey-light);font-family:var(--font-heading);font-size:13px;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all .2s}
-.new-btn:hover{border-color:var(--white);color:var(--white)}
+.dl-btn{flex:1;padding:12px;background:#141414;border:1px solid #333333;color:#cccccc;font-family:var(--font-heading);font-size:13px;letter-spacing:2px;text-decoration:none;border-radius:8px;text-align:center;transition:all .2s}
+.dl-btn:hover{border-color:#ffffff;color:#ffffff}
+.new-btn{padding:12px 20px;background:transparent;border:1px solid #333333;color:#aaaaaa;font-family:var(--font-heading);font-size:13px;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all .2s}
+.new-btn:hover{border-color:#ffffff;color:#ffffff}
 .stencil-output-img{width:100%;border-radius:8px;background:#fff}
 .output-image-wrap{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
 
@@ -697,15 +697,15 @@ input[type=range]::-webkit-slider-thumb{
 .stencil-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px}
 .stencil-left,.stencil-right{display:flex;flex-direction:column}
 .upload-zone{display:block;width:100%;border:2px dashed var(--border);border-radius:12px;cursor:pointer;overflow:hidden;transition:border-color .2s;height:220px}
-.upload-zone:hover{border-color:var(--neon)}
+.upload-zone:hover{border-color:#ffffff}
 .upload-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px;gap:12px}
 .upload-icon{font-size:28px;color:var(--grey)}
 .upload-text{font-family:var(--font-heading);font-size:13px;letter-spacing:2px;color:var(--grey-light)}
 .upload-sub{font-size:10px;color:var(--grey);letter-spacing:1px}
 .upload-preview{width:100%;height:220px;object-fit:cover;display:block}
 .output-placeholder{border:1px dashed var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;height:220px}
-.output-placeholder-text{font-family:var(--font-heading);font-size:11px;letter-spacing:2px;color:var(--grey)}
-.section-label{font-size:10px;letter-spacing:3px;color:var(--grey);text-transform:uppercase;margin-bottom:10px}
+.output-placeholder-text{font-family:var(--font-heading);font-size:11px;letter-spacing:2px;color:#555555}
+.section-label{font-size:10px;letter-spacing:3px;color:#666666;text-transform:uppercase;margin-bottom:10px}
 @media(max-width:768px){.stencil-layout{grid-template-columns:1fr}}
 </style>
 </head>
