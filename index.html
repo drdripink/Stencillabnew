@@ -1553,7 +1553,7 @@ async function generateStencil(){
     var result=null;
 
     // Professional tattoo stencil prompt — optimised for clean linework output
-    var stencilPrompt='Convert the provided reference image into a clean professional tattoo stencil in contour-mapping style. Use black linework only on a white background. Keep the design SIMPLE and CLEAN — avoid excessive detail and crossing lines. Use a medium level of detail with clear line hierarchy: bold outer contour lines for primary shapes, thin inner lines only for essential facial features (eyes, nose, lips, brows). Use sparse dashed lines only to indicate the most important shadow zones — do not add hatching or shading lines everywhere. Lines must flow naturally and NOT cross each other. Preserve the key expression and main facial structure from the reference. Keep hair and organic elements simplified — use flowing single strokes rather than dense bundles. Eliminate all unnecessary lines, crossovers, and micro-detail. Prioritize clean readable linework over complexity. The stencil must be easy to read and transfer to skin. Detail level: medium. Line weight: fine outer lines, lighter inner lines. Sketch intensity: low-medium (0.4). Avoid: crossing lines, overlapping strokes, excessive hatching, dense bundled lines, over-detailed areas. Output as a clean high-contrast black-and-white tattoo stencil. Skin-readable spacing, tattoo longevity optimized.';
+    var stencilPrompt='Convert this reference image into a professional tattoo stencil. Style: clean fine-line blackwork with fluid organic linework. Black lines on pure white background only. Trace every element with precision: draw each individual hair strand as a separate flowing line following the natural direction of the hair — lines must flow parallel and never cross randomly. Facial features must be fully detailed: trace all eyelashes individually, define the iris, eyebrows, nose bridge, nostril curves, lip edges and cupid bow, chin contour. On the face use sparse dashed contour lines only to indicate shadow zones (cheeks, under-eyes, nose sides) — keep face area clean with minimal lines. Hands, fingers, jewelry and all clothing elements must be carefully traced. All linework must follow the natural form and flow of the subject — lines that describe hair all flow in the same direction, face contours curve with the anatomy. Line weight: thin and consistent throughout — no thick fills, no solid black areas. The result must look like a professional hand-drawn tattoo line art with high detail, clean spacing between lines, and every stroke intentional. Do not simplify important features. Do not add random crossing lines. Do not fill any areas. Output: high resolution black and white tattoo stencil ready for transfer.';
 
     if(hasRep){
       try{
@@ -1587,7 +1587,7 @@ async function generateStencil(){
         var od=oc.getImageData(0,0,S,S);var opx=od.data;
         for(var i=0;i<opx.length;i+=4){
           var lum=0.299*opx[i]+0.587*opx[i+1]+0.114*opx[i+2];
-          var v=lum<190?0:255;opx[i]=opx[i+1]=opx[i+2]=v;opx[i+3]=255;
+          var v=lum<170?0:255;opx[i]=opx[i+1]=opx[i+2]=v;opx[i+3]=255;
         }
         oc.putImageData(od,0,0);
         result=out.toDataURL('image/png');
