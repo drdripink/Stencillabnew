@@ -1577,9 +1577,9 @@ async function generateStencil(){
         var srcDataUrl=canvas.toDataURL('image/png');
         // Mode-specific line art prompts for google/nano-banana-2
         var bananaPrompts={
-          simple:'Convert this photograph into a clean tattoo stencil line drawing. Pure black continuous outlines on pure white background. Bold confident single-weight lines tracing only the main contours and key features. Remove all shading, gradients, color, grey tones, and fills. The result must look like a printable tattoo stencil — crisp vector-style line art, nothing else. No watermark, no text, no signature.',
-          moderate:'Convert this photograph into a professional tattoo stencil line drawing. Clean black lines on pure white background. Use varied line weights — thicker bold outlines for main features (face contour, jawline, major shapes) and thinner lines for interior detail (eyes, lips, individual hair strands). Preserve all key shapes and flourishes as continuous flowing curves. No shading, no grey, no color, no fill — only black lines on white. Printable tattoo stencil, thermal transfer ready. No watermark, no text.',
-          expert:'Convert this photograph into a master-level tattoo stencil line drawing in the style of professional tattoo artists. Pure black ink lines on pure white paper. Use three distinct line weights: thick bold for primary outlines, medium for secondary features, fine for intricate detail (individual eyelashes, lip texture, hair strands, decorative flourishes). Redraw all features as clean continuous vector-style curves — do not trace photographic edges. Include dashed or implied construction lines where appropriate for shading guidance. Zero grey, zero color, zero fill, zero gradient. Stencil must be ready for thermal transfer to skin. No watermark, no signature, no text.'
+          simple:'Convert this image into a simple tattoo stencil. Thin clean black outlines only on pure white. No fills, no shading, no grey.',
+          moderate:'Convert this image into a moderate tattoo stencil. Thin clean black lines on pure white. Capture main features and outlines.',
+          expert:'Convert this image into a professional tattoo stencil line drawing. Use ONLY ultra-thin precise black hairlines on pure white. Faithfully trace every single element from the reference: all individual hair strands, eyelashes, eyebrows, lips, nose, skin contour lines, clothing folds, jewelry, tears, and all fine texture details. THIN lines only — no thick fills, no heavy black areas, no solid masses. Every line must be a single thin stroke. Capture maximum detail with minimum line weight. Pure black on pure white only.'
         };
         var bananaPrompt=bananaPrompts.expert;// always expert quality
         var output=await callReplicate('google/nano-banana-2',{
@@ -1601,7 +1601,7 @@ async function generateStencil(){
         var oox=Math.round((SIZE-osw)/2),ooy=Math.round((SIZE-osh)/2);
         ctx.drawImage(aiImg,oox,ooy,osw,osh);
         // Threshold to pure black/white for true stencil output
-        var final=null;
+        var thresh=160;// threshold: higher=thinner cleaner lines
         try{
           var d=ctx.getImageData(0,0,SIZE,SIZE),out=new ImageData(SIZE,SIZE);
           for(var i=0;i<SIZE*SIZE;i++){
