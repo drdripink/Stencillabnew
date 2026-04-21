@@ -103,9 +103,6 @@ async def generate_stencil(
     })
 
 
-# Static frontend (mounted last so /api/* takes priority)
-STATIC_DIR = Path(__file__).parent.parent / "static"
-if STATIC_DIR.exists():
 # --- Replicate proxy routes (legacy frontend compat) ---------------------
 import os as _os_proxy
 import httpx as _httpx_proxy
@@ -172,6 +169,9 @@ async def replicate_get_prediction(prediction_id: str, request: _Request_proxy):
     )
 
 
+# Static frontend (mounted last so /api/* takes priority)
+STATIC_DIR = Path(__file__).parent.parent / "static"
+if STATIC_DIR.exists():
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 
