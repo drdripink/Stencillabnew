@@ -1804,12 +1804,12 @@ function processStencilPipeline(imageData, w, h, mode) {
   for(var i=0;i<N;i++){
     var weight=0;
     if(finalP[i]===255) weight=1.00;
-    else if(finalF[i]===255) weight=0.72;
-    else if(finalP[i]===180) weight=0.68;
+    else if(finalF[i]===255) weight=0.50;
+    else if(finalP[i]===180) weight=0.45;
     else if(finalP[i]===150) weight=0.55;
-    else if(finalP[i]===100) weight=0.40;
-    else if(finalF[i]>0) weight=0.35;
-    else if(finalT[i]>0) weight=0.22;
+    else if(finalP[i]===100) weight=0.25;
+    else if(finalF[i]>0) weight=0.20;
+    else if(finalT[i]>0) weight=0.12;
     if(weight===0){
       out_img.data[i*4]=255;out_img.data[i*4+1]=255;out_img.data[i*4+2]=255;out_img.data[i*4+3]=255;
     } else {
