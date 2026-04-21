@@ -1,23 +1,44 @@
-# fly.toml app configuration file
+# fly.toml — StencilLab v2 (backend pipeline + static frontend)
 #
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
+# Deploy: `fly deploy`
+# Secrets needed (set via `fly secrets set ...`):
+#   GEMINI_API_KEY      — Google AI Studio, for nano-banana-2
+#   ANTHROPIC_API_KEY   — for Stage 4 vision verification
+#   REPLICATE_API_TOKEN — optional, enables ControlNet route / Expert tier
 
-app = 'stencillab-ns2ljw'
-primary_region = 'ams'
+app = "stencillab-ns2ljw"
+primary_region = "iad"
 
 [build]
+
+[env]
+  PORT = "8080"
+  VERIFY_MODEL = "claude-sonnet-4-6"
+  VERIFY_THRESHOLD = "7.5"
+  GEMINI_MODEL = "gemini-2.5-flash-image"
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = "stop"
   auto_start_machines = true
   min_machines_running = 0
-  processes = ['app']
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 25
+    soft_limit = 20
 
 [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
-  memory_mb = 256
+  size = "shared-cpu-2x"
+  memory = "2gb"
+  cpus = 2
+
+[[http_service.checks]]
+  grace_period = "20s"
+  interval = "30s"
+  method = "get"
+  path = "/api/health"
+  protocol = "http"
+  timeout = "5s"
