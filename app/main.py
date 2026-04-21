@@ -1,8 +1,7 @@
 """
 StencilLab FastAPI application.
 
-One endpoint does the real work: POST /api/stencil
-Everything else is static file serving for the existing HTML frontend.
+Serves the SPA frontend and proxies Replicate API requests.
 """
 from __future__ import annotations
 
@@ -16,7 +15,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .pipeline import run_pipeline
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,61 +44,6 @@ async def health():
             "anthropic": bool(os.environ.get("ANTHROPIC_API_KEY")),
         },
     }
-
-
-@app.post("/api/stencil")
-async def generate_stencil(
-    image: UploadFile = File(...),
-    tier: Literal["simple", "moderate", "expert"] = Form("moderate"),
-    line_intensity: float = Form(0.85),
-    vectorize: bool = Form(True),
-):
-    """
-    Main pipeline endpoint.
-
-    Returns JSON:
-      {
-        "png": "<base64>",          # always present
-        "svg": "<svg string>" | null,
-        "verification": {...},
-        "attempts": <int>,
-        "provider": "gemini" | "replicate",
-        "model": "...",
-        "timings": [{"name": ..., "ms": ...}, ...],
-        "warnings": [...]
-      }
-    """
-    raw = await image.read()
-    if not raw:
-        raise HTTPException(400, "empty upload")
-    if len(raw) > 20 * 1024 * 1024:
-        raise HTTPException(413, "image too large (max 20MB)")
-    if not (0.1 <= line_intensity <= 1.5):
-        raise HTTPException(400, "line_intensity must be between 0.1 and 1.5")
-
-    try:
-        result = await run_pipeline(
-            image_bytes=raw,
-            tier=tier,
-            line_intensity=line_intensity,
-            vectorize=vectorize,
-        )
-    except KeyError as e:
-        raise HTTPException(500, f"missing required env var: {e}")
-    except Exception as e:
-        logging.exception("pipeline error")
-        raise HTTPException(500, f"pipeline failed: {e}")
-
-    return JSONResponse({
-        "png": base64.b64encode(result.png).decode("ascii"),
-        "svg": result.svg,
-        "verification": result.verification,
-        "attempts": result.attempts,
-        "provider": result.provider,
-        "model": result.model,
-        "timings": [{"name": t.name, "ms": t.ms} for t in result.timings],
-        "warnings": result.warnings,
-    })
 
 
 # --- Replicate proxy routes (legacy frontend compat) ---------------------
