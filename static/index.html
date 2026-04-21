@@ -1792,16 +1792,7 @@ function processStencilPipeline(imageData, w, h, mode) {
   var cleanT=p.tonal?morphClean(tonalEdges):new Uint8Array(N);
 
   // STAGE 8: Stroke width normalisation (lines <1.5px dilated for thermal printing)
-  function dilate1px(edges){
-    var out=new Uint8Array(N);
-    for(var i=0;i<N;i++) out[i]=edges[i];
-    for(var y=1;y<h-1;y++) for(var x=1;x<w-1;x++){
-      if(edges[y*w+x]) continue;
-      if(edges[(y-1)*w+x]===255||edges[(y+1)*w+x]===255||
-         edges[y*w+(x-1)]===255||edges[y*w+(x+1)]===255) out[y*w+x]=100;
-    }
-    return out;
-  }
+  function dilate1px(edges){ return edges; }
   var finalP=mode==='expert'?closedP:dilate1px(closedP);
   var finalF=p.ms?gapClose(cleanF):new Uint8Array(N);
   var finalT=p.tonal?cleanT:new Uint8Array(N);
