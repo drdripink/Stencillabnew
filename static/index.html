@@ -1166,7 +1166,7 @@ function renderSubscription() {
 // ── SETTINGS (ADMIN ONLY) ───────────────────────────────────────────────────
 function renderSettings(){
   var hasKey=STATE.apiKey&&STATE.apiKey.length>10;
-  var hasRep=STATE.replicateKey&&STATE.replicateKey.length>10&&!STATE.replicateKey.includes('PASTE');
+  var hasRep=true&&!STATE.replicateKey.includes('PASTE');
   var html='<div class="page-header"><div class="page-title">SETTINGS</div><div class="page-subtitle">Admin API & model configuration</div></div>';
 
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px">';
@@ -1479,7 +1479,7 @@ async function generateStencil(){
   if(!STATE.stencilInput||STATE.stencilLoading)return;
   STATE.stencilLoading=true;STATE.stencilEdges=null;render();
   var mode=STATE.stencilSettings.level;
-  var hasRep=STATE.replicateKey&&STATE.replicateKey.length>10&&!STATE.replicateKey.includes('PASTE');
+  var hasRep=true&&!STATE.replicateKey.includes('PASTE');
   try{
     var img=new Image();
     await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=STATE.stencilInput;});
@@ -1870,7 +1870,7 @@ async function generateImage(){
   STATE.genPrompt=userPrompt;STATE.genLoading=true;STATE.genOutput=null;render();
   try{
     var palette=STATE.genPalette||'bw';
-    var hasRep=STATE.replicateKey&&STATE.replicateKey.length>10&&!STATE.replicateKey.includes('PASTE');
+    var hasRep=true&&!STATE.replicateKey.includes('PASTE');
     if(hasRep){
       var output;
       var fullPrompt='';
@@ -1924,7 +1924,7 @@ async function enhancePhoto(){
   if(!STATE.enhanceInput||STATE.enhanceLoading) return;
   STATE.enhanceLoading=true;render();
   try{
-    var hasRep=STATE.replicateKey&&STATE.replicateKey.length>10&&!STATE.replicateKey.includes('PASTE');
+    var hasRep=true&&!STATE.replicateKey.includes('PASTE');
     if(hasRep){
       var ib=await imageToBase64(STATE.enhanceInput);
       var output=await callReplicate(
