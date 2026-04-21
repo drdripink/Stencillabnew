@@ -1813,7 +1813,7 @@ function processStencilPipeline(imageData, w, h, mode) {
     if(weight===0){
       out_img.data[i*4]=255;out_img.data[i*4+1]=255;out_img.data[i*4+2]=255;out_img.data[i*4+3]=255;
     } else {
-      var minA=(weight>=0.95)?0.82:(weight>=0.60)?0.62:0.38;
+      var minA=(weight>=0.95)?0.45:(weight>=0.60)?0.32:0.18;
       if(mode==='simple') minA=Math.max(minA,0.88);
       var alpha=Math.max(Math.min(1,weight*baseOpacity*1.0),minA);
       var v=Math.round(255*(1-alpha));
