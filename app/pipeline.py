@@ -1,5 +1,5 @@
 r2""
-Pipeline orchestrator â wires all five stages together with a retry loop
+Pipeline orchestrator â— wires all five stages together with a retry loop
 driven by the vision verifier.
 
 Flow:
