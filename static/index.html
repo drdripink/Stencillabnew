@@ -655,7 +655,7 @@ var STATE = {
   stencilOutput: null,
   stencilLoading: false,
   stencilEdges: null,
-  stencilSettings: { level: 'simple', lineIntensity: 0.85 },
+  stencilSettings: { level: 'expert', lineIntensity: 0.85 }, // unified "best output" — intensity locked at 85%
   enhanceInput: null,
   enhanceOutput: null,
   enhanceLoading: false,
@@ -999,11 +999,17 @@ function renderProfile() {
 // ── STENCIL ─────────────────────────────────────────────────────────────────
 function renderStencil() {
   var s = STATE.stencilSettings;
+  // ROLLBACK: original 3-tier array below. To restore, swap back and revert state default on line ~658.
+  // var modes = [
+  //   {id:'simple',   label:'SIMPLE',   tag:'CLEAN LINES',  desc:'Bold outlines only — easiest to trace',       cls:'active-simple',   color:'var(--success)'},
+  //   {id:'moderate', label:'MODERATE', tag:'BALANCED',      desc:'Main lines plus shadow boundaries',            cls:'active-moderate', color:'var(--warning)'},
+  //   {id:'expert',   label:'EXPERT',   tag:'FULL DETAIL',   desc:'All detail, blend zones, complete tonal map',  cls:'active-expert',   color:'var(--accent)'}
+  // ];
   var modes = [
-    {id:'simple',   label:'SIMPLE',   tag:'CLEAN LINES',  desc:'Bold outlines only — easiest to trace',       cls:'active-simple',   color:'var(--success)'},
-    {id:'moderate', label:'MODERATE', tag:'BALANCED',      desc:'Main lines plus shadow boundaries',            cls:'active-moderate', color:'var(--warning)'},
-    {id:'expert',   label:'EXPERT',   tag:'FULL DETAIL',   desc:'All detail, blend zones, complete tonal map',  cls:'active-expert',   color:'var(--accent)'}
+    {id:'expert', label:'BEST OUTPUT', tag:'MAXIMUM QUALITY', desc:'Professional tattoo-grade stencil — full detail, faithful to source', cls:'active-expert', color:'var(--accent)'}
   ];
+  // Lock level to 'expert' regardless of any stale stored value
+  s.level = 'expert';
   var html = '<div class="page-header"><div class="page-title">STENCIL <span>GENERATOR</span></div>';
   html += '<div class="page-subtitle">Professional AI-powered tattoo stencils &bull; ' + (STATE.replicateKey && STATE.replicateKey.length>10 && !STATE.replicateKey.includes('PASTE') ? '<span style="color:#aaa">&#9679; ControlNet AI active</span>' : '<span style="color:#555">&#9679; Canvas mode (add Replicate key for AI)</span>') + '</div></div>';
   html += '<div class="grid-2">';
@@ -1044,15 +1050,17 @@ function renderStencil() {
   // Right
   html += '<div><label class="label">OUTPUT</label>';
   if (STATE.stencilOutput) {
-    html += '<div style="background:#fff;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.4)">';
+    html += '<div id="stencil-result-wrap" style="background:#fff;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.4)">';
     html += '<img id="stencil-result" src="' + STATE.stencilOutput + '" style="width:100%;display:block"/></div>';
-    html += '<div style="margin-top:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">';
-    html += '<label class="label" style="margin:0">LINE INTENSITY</label>';
-    html += '<div id="intensity-val" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent)">' + Math.round(STATE.stencilSettings.lineIntensity*100) + '%</div>';
-    html += '</div><input type="range" id="intensity-slider" min="0" max="1" step="0.01" value="' + STATE.stencilSettings.lineIntensity + '" style="width:100%"/>';
-    html += '<div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:10px;color:var(--text3)">Light</span><span style="font-size:10px;color:var(--text3)">Bold</span></div>';
-    html += '</div>';
+    // ROLLBACK: intensity slider UI removed — line intensity locked at 85% (see state default).
+    // Original block:
+    // html += '<div style="margin-top:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2)">';
+    // html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">';
+    // html += '<label class="label" style="margin:0">LINE INTENSITY</label>';
+    // html += '<div id="intensity-val" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent)">' + Math.round(STATE.stencilSettings.lineIntensity*100) + '%</div>';
+    // html += '</div><input type="range" id="intensity-slider" min="0" max="1" step="0.01" value="' + STATE.stencilSettings.lineIntensity + '" style="width:100%"/>';
+    // html += '<div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:10px;color:var(--text3)">Light</span><span style="font-size:10px;color:var(--text3)">Bold</span></div>';
+    // html += '</div>';
     html += '<div style="display:flex;gap:8px;margin-top:12px">';
     html += '<button id="btn-download-stencil" class="btn btn-primary" style="flex:1;height:44px">DOWNLOAD</button>';
     html += '<button id="btn-new-stencil" class="btn btn-outline" style="flex:1;height:44px">NEW</button>';
@@ -1496,13 +1504,43 @@ async function generateStencil(){
       try{
         // Prepare source image as data URL (1024x1024 with white pad) for Nano Banana
         var srcDataUrl=canvas.toDataURL('image/jpeg',0.85);
-        // Mode-specific line art prompts for google/nano-banana-2
-        var bananaPrompts={
-          simple:'Convert this photograph into a clean tattoo stencil line drawing. Pure black continuous outlines on pure white background. Bold confident single-weight lines tracing only the main contours and key features. Remove all shading, gradients, color, grey tones, and fills. The result must look like a printable tattoo stencil — crisp vector-style line art, nothing else. No watermark, no text, no signature.',
-          moderate:'Convert this photograph into a professional tattoo stencil line drawing. Clean black lines on pure white background. Use varied line weights — thicker bold outlines for main features (face contour, jawline, major shapes) and thinner lines for interior detail (eyes, lips, individual hair strands). Preserve all key shapes and flourishes as continuous flowing curves. No shading, no grey, no color, no fill — only black lines on white. Printable tattoo stencil, thermal transfer ready. No watermark, no text.',
-          expert:'Convert this photograph into a master-level tattoo stencil line drawing in the style of professional tattoo artists. Pure black ink lines on pure white paper. Use three distinct line weights: thick bold for primary outlines, medium for secondary features, fine for intricate detail (individual eyelashes, lip texture, hair strands, decorative flourishes). Redraw all features as clean continuous vector-style curves — do not trace photographic edges. Include dashed or implied construction lines where appropriate for shading guidance. Zero grey, zero color, zero fill, zero gradient. Stencil must be ready for thermal transfer to skin. No watermark, no signature, no text.'
-        };
-        var bananaPrompt=bananaPrompts[mode]||bananaPrompts.moderate;
+        // ROLLBACK: original 3-tier prompts below. To restore, swap the assignment back to bananaPrompts[mode]||bananaPrompts.moderate.
+        // var bananaPrompts={
+        //   simple:'Convert this photograph into a clean tattoo stencil line drawing. Pure black continuous outlines on pure white background. Bold confident single-weight lines tracing only the main contours and key features. Remove all shading, gradients, color, grey tones, and fills. The result must look like a printable tattoo stencil — crisp vector-style line art, nothing else. No watermark, no text, no signature.',
+        //   moderate:'Convert this photograph into a professional tattoo stencil line drawing. Clean black lines on pure white background. Use varied line weights — thicker bold outlines for main features (face contour, jawline, major shapes) and thinner lines for interior detail (eyes, lips, individual hair strands). Preserve all key shapes and flourishes as continuous flowing curves. No shading, no grey, no color, no fill — only black lines on white. Printable tattoo stencil, thermal transfer ready. No watermark, no text.',
+        //   expert:'Convert this photograph into a master-level tattoo stencil line drawing in the style of professional tattoo artists. Pure black ink lines on pure white paper. Use three distinct line weights: thick bold for primary outlines, medium for secondary features, fine for intricate detail (individual eyelashes, lip texture, hair strands, decorative flourishes). Redraw all features as clean continuous vector-style curves — do not trace photographic edges. Include dashed or implied construction lines where appropriate for shading guidance. Zero grey, zero color, zero fill, zero gradient. Stencil must be ready for thermal transfer to skin. No watermark, no signature, no text.'
+        // };
+        // var bananaPrompt=bananaPrompts[mode]||bananaPrompts.moderate;
+
+        // Unified faithfulness-focused prompt for google/nano-banana-2.
+        // Model has no strength/guidance parameter — all fidelity control lives here in the prompt.
+        var bananaPrompt=[
+          'Convert the provided reference image into a professional, tattoo-artist-grade line stencil — the kind a master tattooer would hand-draw for a high-end client.',
+          '',
+          'FAITHFULNESS IS THE ABSOLUTE RULE. The stencil must reproduce only what is visibly present in the source image. Every line you draw must correspond to a real element in the reference. Do not invent, embellish, reinterpret, or "improve" the subject. If something is not in the source, it does not appear in the output.',
+          '',
+          'Execute at the highest professional standard:',
+          '- Pure black linework (#000000) on pure white background (#FFFFFF)',
+          '- Clean, confident, unbroken outlines — no sketchy, hesitant, or broken strokes',
+          '- Intentional line-weight variation: heavier for outer contours and dominant forms, finer for interior detail',
+          '- Bold, high-contrast graphic treatment with strong visual presence',
+          '- Shading rendered exclusively through traditional tattoo-stencil techniques — parallel hatching, cross-hatching, stippling, or dot-work — mapped accurately to the tonal areas of the source',
+          '- Crisp, vector-like clarity, fully transferable to skin at working scale',
+          '- Maximum craftsmanship — the output should read as the work of a top-tier tattoo artist, not an AI',
+          '',
+          'STRICTLY DO NOT ADD any of the following, under any circumstances:',
+          '- Background textures, patterns, scenery, or environmental elements of any kind',
+          '- Cracks, distressing, weathering, grunge, or "aged paper" effects',
+          '- Decorative borders, frames, flourishes, banners, scrollwork, or ornamental extras',
+          '- Objects, subjects, or figures that are not present in the reference',
+          '- Stippling, noise, or texture in regions that are blank or uniform in the source',
+          '- Artistic signatures, stylistic flourishes, or "artist touches"',
+          '- Color, gray tones, soft gradients, anti-aliasing blur, or photographic shading',
+          '',
+          'NEGATIVE SPACE IS PROTECTED. Where the reference image is empty, uniform, or featureless, the stencil must also be empty — pure white, untouched, no marks. Do not fill blank areas with invented detail of any kind.',
+          '',
+          'The final output is a clean, bold, professional tattoo stencil — maximum craft quality, zero invented content — ready for an artist to transfer directly to skin.'
+        ].join('\n');
         var output=await callReplicate('google/nano-banana-2',{
           prompt:bananaPrompt,
           image_input:[srcDataUrl],
