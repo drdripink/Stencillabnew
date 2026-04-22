@@ -100,12 +100,13 @@ def _check_origin_and_rate(request, is_post: bool):
 
 
 def _resolve_auth(request):
-    incoming = request.headers.get("authorization", "")
-    if incoming.lower().startswith("token ") or incoming.lower().startswith("bearer "):
-        return incoming
+    # Always prefer server-side Fly secret — ignore stale/invalid client tokens.
     server_token = _os_proxy.environ.get("REPLICATE_API_TOKEN")
     if server_token:
         return f"Token {server_token}"
+    incoming = request.headers.get("authorization", "")
+    if incoming.lower().startswith("token ") or incoming.lower().startswith("bearer "):
+        return incoming
     return None
 
 
