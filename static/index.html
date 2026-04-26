@@ -1474,23 +1474,26 @@ var PROMPT_SHADING = [
 ].join('\n');
 
 var bananaPrompt = [
-  'Convert the provided reference image into a SOLID BLACK INK tattoo stencil — the kind a master tattoo artist would prepare for a high-end client, drawn with a thick black marker on bright white paper. The output must be a faithful, HIGH-CONTRAST black-and-white line stencil ready for thermal transfer to skin.',
+  'Convert the provided reference image into a clean OUTLINE-ONLY tattoo stencil in the style of a master tattoo artist (think Darwin Enriquez): pure black ink lines on white paper, single uniform thin line weight, loose confident hand-drawn quality, maximum negative space. The output is a STENCIL TEMPLATE — outlines only, no shading, no fill, no tonal rendering of any kind.',
   '',
-  'CRITICAL — LINE OPACITY: Every line, stroke, and mark in the output MUST be SOLID PURE BLACK (#000000) at 100% opacity. NEVER render lines as light gray, faded, faint, washed-out, watercolor, pencil-thin, sketchy, or low-opacity strokes. Treat this as if drawn with permanent black ink — every stroke is fully opaque, deep black, immediately readable. If any line in the output looks gray or faded, the stencil has FAILED.',
+  'CRITICAL — LINE STYLE:',
+  '- Every line is SOLID PURE BLACK (#000000) at 100% opacity — never gray, faded, or low-opacity',
+  '- Single uniform thin line weight throughout — like a fine-tip pen, not a marker',
+  '- Confident continuous strokes — flowing curves, not photographic edges',
+  '- Loose hand-drawn quality — organic, expressive, slightly imperfect strokes (the way a tattoo artist draws by hand)',
+  '- NO line-weight hierarchy — do not make some lines thick and some thin; keep them consistently thin',
   '',
   'FAITHFULNESS IS THE ABSOLUTE RULE. Reproduce only what is visibly present in the source image. Every line must correspond to a real edge or feature in the reference. Do not invent, embellish, reinterpret, or "improve" the subject. If something is not in the source, it does not appear in the output.',
   '',
-  'Execute as professional stencil art:',
-  '- SOLID PURE BLACK (#000000) linework on PURE WHITE (#FFFFFF) background — maximum contrast, zero gray',
-  '- Bold, confident, fully-inked strokes — every line clearly visible at normal viewing distance',
-  '- Continuous vector-style curves — smooth flowing lines, not photographic edges',
-  '- Intentional line-weight variation: thick bold strokes for primary contours, medium for secondary features, fine but still SOLID BLACK strokes for interior detail',
-  '- Tonal areas of the source rendered as dense parallel hatching, cross-hatching, or stippling in solid black ink — mapped accurately to actual shadow zones in the reference',
-  '- Crisp, printable clarity — the stencil must be immediately readable when transferred to skin',
+  'WHERE SHADING EXISTS IN THE SOURCE:',
+  '- Suggest it with brief dashed or dotted hint-lines along major shadow boundaries only (e.g. cheekbone shadow line, jawline contour, nose-side shadow)',
+  '- Do NOT fill, hatch, cross-hatch, stipple, or render solid tonal areas',
+  '- Most of the face/subject should remain pure white — let negative space breathe',
   '',
   'STRICTLY DO NOT INCLUDE:',
-  '- Light gray, faded, washed-out, low-opacity, or watercolor-style strokes',
-  '- Pencil-sketch aesthetics or hesitant linework',
+  '- Hatching, cross-hatching, stippling, dot-work, parallel-line shading, or any solid tonal fill',
+  '- Bold thick outlines or marker-style strokes',
+  '- Light gray, faded, washed-out, or low-opacity strokes',
   '- Background textures, patterns, scenery, or environmental elements',
   '- Cracks, distressing, weathering, grunge, or aged-paper effects',
   '- Decorative borders, frames, banners, or ornamental flourishes not present in the source',
@@ -1498,9 +1501,9 @@ var bananaPrompt = [
   '- Color, gray photographic tones, soft gradients, or anti-aliasing blur',
   '- Artistic signatures, watermarks, or text',
   '',
-  'NEGATIVE SPACE IS PROTECTED. Where the reference is empty, uniform, or featureless, the stencil must also be empty — pure white, untouched. Do not fill blank areas with invented detail.',
+  'NEGATIVE SPACE IS PROTECTED AND PREFERRED. Where the reference is empty, uniform, or featureless, the stencil must also be empty — pure white, untouched. The output should feel airy and minimal, with most of the canvas left as clean white space. Do not fill blank areas with invented detail.',
   '',
-  'Final output: a clean, BOLD, SOLID BLACK INK tattoo stencil — maximum contrast and craftsmanship, zero invented content, every line fully visible and ready to transfer directly to skin.'
+  'Final output: a clean, thin-line, OUTLINE-ONLY tattoo stencil in solid black ink — confident hand-drawn quality, maximum negative space, zero shading or fill, ready for thermal transfer to skin.'
 ].join('\n');
 
 // Composite lineart (top) over shading (bottom) onto a white canvas.
