@@ -1473,47 +1473,7 @@ var PROMPT_SHADING = [
   'Final output: a faithful, white-background shading map using mid-grey hatching — the shading layer of a professional tattoo stencil.'
 ].join('\n');
 
-var bananaPrompt = [
-  'Convert the provided reference image into a hand-drawn tattoo stencil in the style of master tattoo artist Darwin Enriquez: thin pure-black ink lines on white paper, single uniform line weight throughout, dense detailed continuous linework with organic hand-drawn quality. The output is a STENCIL TEMPLATE — outlines and texture lines only, no shading, no fill, no tonal rendering.',
-  '',
-  'CRITICAL — LINE STYLE:',
-  '- Every line is SOLID PURE BLACK (#000000) at 100% opacity — never gray, faded, or low-opacity',
-  '- Single uniform thin line weight throughout — like a fine-tip pen drawn by a confident artist',
-  '- All strokes are CONTINUOUS lines — never dashed, never dotted, never broken into hint-marks',
-  '- Slightly wavering, organic hand-drawn quality — the way real ink flows from a pen, with subtle imperfection that reads as "drawn by a human, not a machine"',
-  '- NO line-weight hierarchy — keep all lines consistently thin',
-  '',
-  'FAITHFULNESS IS THE ABSOLUTE RULE. Reproduce only what is visibly present in the source image. Every line must correspond to a real edge or feature in the reference. Preserve unique source characteristics (e.g. a closed eye stays closed, a scar stays a scar). Do not invent, embellish, reinterpret, or "improve" the subject. If something is not in the source, it does not appear in the output.',
-  '',
-  'INTERIOR DETAIL DENSITY:',
-  '- Map fine fur/texture direction with multiple short continuous strokes INSIDE larger contours (not just at silhouette edges)',
-  '- Subjects should feel detailed and richly described, not minimalist or empty',
-  '- Inside fur/hair zones: many small directional strokes following the fur grain',
-  '- Inside skin zones: subtle continuous contour lines suggesting form (cheekbone, jawline, nose-side) — drawn as full lines, NOT as dashes or dots',
-  '- Stripe/pattern markings: outlined as continuous shapes, never filled',
-  '',
-  'SILHOUETTE QUALITY:',
-  '- Fur edges should be feathered/jagged with small tufts and breaks suggesting fur — never smooth uniform curves',
-  '- Whiskers as fine wispy strokes of varied length and slight curve — not identical straight lines',
-  '- Stripes follow the form of the body with organic variation',
-  '',
-  'STRICTLY DO NOT INCLUDE:',
-  '- Dashed lines, dotted lines, broken hint-marks, or stippling of any kind — only continuous strokes',
-  '- Hatching, cross-hatching, parallel-line shading, dot-work, or any solid tonal fill',
-  '- Bold thick outlines or marker-style strokes',
-  '- Light gray, faded, washed-out, or low-opacity strokes',
-  '- Smooth machine-vector quality — output should feel hand-drawn',
-  '- Background textures, patterns, scenery, or environmental elements',
-  '- Cracks, distressing, weathering, grunge, or aged-paper effects',
-  '- Decorative borders, frames, banners, or ornamental flourishes not present in the source',
-  '- Objects, subjects, or figures not present in the reference',
-  '- Color, gray photographic tones, soft gradients, or anti-aliasing blur',
-  '- Artistic signatures, watermarks, or text',
-  '',
-  'NEGATIVE SPACE: Background and areas outside the subject should be pure white. INSIDE the subject, lines should be richly detailed — do not leave large empty zones inside the subject body where source detail exists.',
-  '',
-  'Final output: a thin-line, hand-drawn, densely detailed tattoo stencil in solid black ink — Darwin Enriquez style — every line continuous and confident, faithful to source structure, ready for thermal transfer to skin.'
-].join('\n');
+var bananaPrompt = "Convert the provided image into a realistic tattoo stencil line drawing. Maintain exactly the proportions, composition, and details of the original. Do not change the position, size, or shape of any element. Do not modify expressions, perspectives, or proportions of the face or body. Generate the result using only clean, sharp, precise black lines on a white background, without color, shadows, or fills. Use the shadow, highlight, and filled areas of the original as a guide to mark: main outlines, detail lines, boundaries of important highlights and shadows, relevant textures (such as hair, skin, beard, folds, etc.). The result must look like a professional technical tattoo stencil, ready for transfer, with all lines well-defined, connected, and proportions intact. Do not add, remove, or modify anything from the original image: just translate it into a technical black linear format. Level of detail: high. Maintain total fidelity to the original design, without excessive simplification.";
 
 // Composite lineart (top) over shading (bottom) onto a white canvas.
 // Algorithm:
