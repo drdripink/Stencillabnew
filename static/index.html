@@ -1731,13 +1731,11 @@ async function generateStencil(){
     if(hasRep){
       try{
         var srcDataUrl = canvas.toDataURL('image/png');
-        var output = await callReplicate('google/nano-banana-pro', {
+        var output = await callReplicate('google/nano-banana', {
           prompt: bananaPrompt,
           image_input: [srcDataUrl],
           output_format: 'png',
           aspect_ratio: 'match_input_image',
-          resolution: '4K',
-          safety_filter_level: 'block_only_high'
         });
         var aiUrl = Array.isArray(output) ? output[0] : output;
         var aiImg = await loadImage(aiUrl, 'anonymous');
